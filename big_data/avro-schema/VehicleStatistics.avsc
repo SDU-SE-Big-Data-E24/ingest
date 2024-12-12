@@ -1,0 +1,12 @@
+{
+  "type": "record",
+  "name": "VehicleStatistics",
+  "fields": [
+    { "name": "municipality", "type": "string", "doc": "Kommunekode eller navn" },
+    { "name": "vehicle_type", "type": { "type": "enum", "name": "VehicleType", "symbols": ["CAR", "TRUCK", "BUS", "MOTORCYCLE", "OTHER"] }, "doc": "Type af køretøj" },
+    { "name": "fuel_type", "type": { "type": "enum", "name": "FuelType", "symbols": ["ELECTRIC", "GASOLINE", "DIESEL", "HYBRID", "OTHER"] }, "doc": "Drivmiddel" },
+    { "name": "ownership_type", "type": { "type": "enum", "name": "OwnershipType", "symbols": ["PRIVATE", "CORPORATE", "PUBLIC"] }, "doc": "Ejertype" },
+    { "name": "count", "type": "int", "doc": "Antal køretøjer" },
+    { "name": "date", "type": "string", "logicalType": "date", "doc": "Dato for registrering" }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "type": "record",
+  "name": "EVChargingData",
+  "fields": [
+    { "name": "timestamp", "type": "string", "logicalType": "timestamp-millis", "doc": "Starttidspunkt for opladning" },
+    { "name": "municipality", "type": "string", "doc": "Kommunekode eller navn" },
+    { "name": "charging_station_type", "type": { "type": "enum", "name": "ChargingStationType", "symbols": ["HOME", "WORK", "PUBLIC"] }, "doc": "Ladestationstype" },
+    { "name": "charging_kWh", "type": "double", "doc": "Opladet elektricitet i kWh" },
+    { "name": "vehicle_id", "type": "string", "doc": "Identifikator for køretøjet" }
+  ]
+}

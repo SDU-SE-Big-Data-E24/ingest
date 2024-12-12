@@ -1,0 +1,9 @@
+{
+  "type": "record",
+  "name": "ProductionConsumption",
+  "fields": [
+    { "name": "timestamp", "type": "string", "logicalType": "timestamp-millis", "doc": "Tidspunkt for måling" },
+    { "name": "production_kWh", "type": "double", "doc": "Produceret mængde elektricitet i kWh" },
+    { "name": "consumption_kWh", "type": "double", "doc": "Forbrugt mængde elektricitet i kWh" }
+  ]
+}

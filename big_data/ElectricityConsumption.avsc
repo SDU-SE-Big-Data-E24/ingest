@@ -1,0 +1,12 @@
+//fetch_data_argument.py --url "https://energidataservice.dk/tso-electricity/ConsumptionIndustry"--params '{"municipality": "101"}'--schema "ElectricityConsumption" --kafka-topic "ElectricityConsumptionData"
+
+{
+  "type": "record",
+  "name": "ElectricityConsumption",
+  "fields": [
+    { "name": "municipality", "type": "string", "doc": "Kommunekode eller navn" },
+    { "name": "sector", "type": { "type": "enum", "name": "SectorType", "symbols": ["INDUSTRY", "PUBLIC", "PRIVATE"] } },
+    { "name": "timestamp", "type": "string", "logicalType": "timestamp-millis", "doc": "Tidspunkt for måling" },
+    { "name": "consumption_kWh", "type": "double", "doc": "Forbrug i kWh" }
+  ]
+}

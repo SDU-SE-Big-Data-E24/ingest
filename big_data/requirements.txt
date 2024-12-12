@@ -1,0 +1,4 @@
+requests
+Producer
+fastavro
+BytesIO
