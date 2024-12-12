@@ -51,7 +51,7 @@ jobs:
 
       - name: Build Docker image7
         run: |
-          docker build -t ghcr.io/${{ github.repository }}:$version_number -t ghcr.io/${{ github.repository }}:latest -f big_data/Dockerfile .
+          docker build -t ghcr.io/${{ github.repository }}:$version_number -t ghcr.io/${{ github.repository }}:latest .
 
       - name: Push Docker image to GitHub Container Registry
         run: |
