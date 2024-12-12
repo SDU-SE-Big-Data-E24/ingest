@@ -1,4 +1,3 @@
 requests
 Producer
 fastavro
-BytesIO
