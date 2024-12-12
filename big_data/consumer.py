@@ -2,6 +2,7 @@ import avro.schema
 import avro.io
 from confluent_kafka import Consumer, KafkaError
 import io
+import json
 
 # Kafka and Schema Registry Configuration
 KAFKA_BOOTSTRAP_SERVERS = "kafka:9092"  # Replace with the actual node IP and port
@@ -35,6 +36,15 @@ def deserialize_avro_message(message_value):
     except Exception as e:
         print(f"Error deserializing Avro message: {e}")
         return None
+    
+def deserialize_avro_message2(message):
+    with open(SCHEMA_PATH, "r") as schema_file:
+        schema = json.load(schema_file)
+
+    acro_reader = reader(io.BytesIO(message), schema)
+    for record in avro_reader:
+        return record
+
 
 
 # Consume Messages from Kafka
@@ -59,7 +69,7 @@ def consume_messages():
             print(f"Consumed message: Key={msg.key().decode('utf-8')} Value={msg.value()}")
 
             # Deserialize Avro message
-            record = deserialize_avro_message(msg.value())
+            record = deserialize_avro_message2(msg.value())
             if record:
                 print("Deserialized Record:", record)
 
