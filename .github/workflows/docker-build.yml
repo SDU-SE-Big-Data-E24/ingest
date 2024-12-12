@@ -16,54 +16,44 @@ jobs:
       - name: Setup Docker
         uses: docker/setup-buildx-action@v2
 
-      - name: Get version number
-        id: version
-        run: |
-          if [ ! -f .version ]; then
-            echo "1" > .version
-          fi
-          VERSION=$(cat .version)
-          echo "version_number=$VERSION" >> $GITHUB_ENV
+#      - name: Get version number
+#        id: version
+#        run: |
+#          if [ ! -f .version ]; then
+#            echo "1" > .version
+#          fi
+#          VERSION=$(cat .version)
+#          echo "version_number=$VERSION" >> $GITHUB_ENV
 
-      - name: Increment version number
-        id: increment_version
-        run: |
-          VERSION=$(cat .version)
-          NEXT_VERSION=$((VERSION + 1))
-          echo $NEXT_VERSION > .version
-          echo "next_version=$NEXT_VERSION" >> $GITHUB_ENV
+#      - name: Increment version number
+#        id: increment_version
+#        run: |
+#          VERSION=$(cat .version)
+#          NEXT_VERSION=$((VERSION + 1))
+#          echo $NEXT_VERSION > .version
+#          echo "next_version=$NEXT_VERSION" >> $GITHUB_ENV
+
+      - name: Build and publish a Docker image for ${{ github.repository }}
+        uses: macbre/push-to-ghcr@master
+        with:
+          image_name: ${{ github.repository }}  # it will be lowercased internally
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
 #      - name: Build Docker image7
 #        run: |
-#          docker build -t ghcr.io/${{ github.repository_owner }}/${{ github.repository }}:$version_number -t ghcr.io/${{ github.repository_owner }}/${{ github.repository }}:latest -f big_data/Dockerfile .
+#          docker build -t ghcr.io/${{ github.repository }}:$version_number -t ghcr.io/${{ github.repository }}:latest .
 
 #      - name: Push Docker image to GitHub Container Registry
 #        run: |
 #          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-#          docker push ghcr.io/${{ github.repository_owner }}/${{ github.repository }}:$version_number
-#          docker push ghcr.io/${{ github.repository_owner }}/${{ github.repository }}:latest
-
-#      - name: Build and publish a Docker image for ${{ github.repository }}
-#        uses: macbre/push-to-ghcr@master
-#        with:
-#          image_name: ${{ github.repository }}  # it will be lowercased internally
-#          github_token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build Docker image7
-        run: |
-          docker build -t ghcr.io/${{ github.repository }}:$version_number -t ghcr.io/${{ github.repository }}:latest .
-
-      - name: Push Docker image to GitHub Container Registry
-        run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          docker push ghcr.io/${{ github.repository }}:$version_number
-          docker push ghcr.io/${{ github.repository }}:latest
+#          docker push ghcr.io/${{ github.repository }}:$version_number
+#          docker push ghcr.io/${{ github.repository }}:latest
 
 
-      - name: Commit updated version file
-        run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-          git add .version
-          git commit -m "Update version to $next_version"
-          git push
+#      - name: Commit updated version file
+#        run: |
+#          git config user.name "GitHub Actions"
+#          git config user.email "actions@github.com"
+#          git add .version
+#          git commit -m "Update version to $next_version"
+#          git push
