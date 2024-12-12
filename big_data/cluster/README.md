@@ -51,7 +51,7 @@ kubectl get pod -w
 kubectl describe pod namenode-<ID>
 kubectl logs namenode-<ID>
 ````
-
+# Port-forwarding
 ```bash
 kubectl port-forward svc/namenode 9870:9870
 ```
