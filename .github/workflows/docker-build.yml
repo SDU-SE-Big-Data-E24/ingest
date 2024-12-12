@@ -35,7 +35,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t my-docker-image:$version_number -t my-docker-image:latest .
+          docker build -t my-docker-image:$version_number -t my-docker-image:latest -f big_data/Dockerfile .
 
       - name: Push Docker image to registry
         env:
