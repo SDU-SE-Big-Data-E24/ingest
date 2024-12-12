@@ -6,7 +6,6 @@ from avro.datafile import DataFileWriter
 from avro.io import DatumWriter
 from confluent_kafka import Producer
 from dotenv import load_dotenv
-from datetime import datetime
 
 # Load environment variables from .env
 load_dotenv()
@@ -16,12 +15,6 @@ LAST_TOTAL_FILE = "last_total.pkl"
 
 # File to store processed record keys
 PROCESSED_RECORDS_FILE = "processed_records.pkl"
-
-
-# File to store the first 10 records in a run
-def get_output_file():
-    current_date = datetime.now().strftime("%Y-%m-%d")
-    return f"collected_records_{current_date}.txt"
 
 
 # Load the last total value
@@ -78,7 +71,7 @@ def fetch_api_data():
         response.raise_for_status()
         result = response.json()
 
-        current_total = result.get('total')
+        current_total = result.get('total', 0)
         last_total = load_last_total()
 
         if current_total != last_total:
@@ -103,13 +96,6 @@ def serialize_record(record):
     except Exception as e:
         print(f"Error serializing record: {e}")
         return False
-
-
-# Write record key to file
-def write_to_output_file(record_key):
-    output_file = get_output_file()
-    with open(output_file, "a") as f:
-        f.write(record_key + "\n")
 
 
 # Send Record to Kafka
@@ -142,23 +128,18 @@ def produce_messages(producer):
     # Load previously processed records
     processed_records = load_processed_records()
 
-    collected_count = 0  # Track how many records have been collected in this run
     for record in records:
+        # Generate a composite key
         record_key = f"{record.get('HourUTC')}-{record.get('HourDK')}-{record.get('MunicipalityNo')}-{record.get('Branche')}-{record.get('ConsumptionkWh')}"
 
         if record_key in processed_records:
             print(f"Skipping duplicate record: {record_key}")
-            exit  # Skip already processed records
+            continue  # Skip already processed records
 
-        if collected_count <= 1:  # Stop after collecting 10 records
-            record_key = f"{record.get('HourUTC')}-{record.get('HourDK')}-{record.get('MunicipalityNo')}-{record.get('Branche')}-{record.get('ConsumptionkWh')}"
-            write_to_output_file(record_key)
-
-        # Send the record to Kafka
         send_to_kafka(record, producer)
 
         # Mark record as processed
-        collected_count += 1
+        processed_records.add(record_key)
 
     # Save processed records
     save_processed_records(processed_records)

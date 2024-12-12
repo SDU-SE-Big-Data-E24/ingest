@@ -6,7 +6,7 @@ import time
 KAFKA_CLIENT_IMAGE = "docker.io/bitnami/kafka:3.8.0-debian-12-r3"
 PYTHON_IMAGE = "python"
 HDFS_SERVICES_PATH = "../../services/hdfs"
-INTERACTIVE_DEPLOYMENT_PATH = "../../services/interactive/interactive.yaml"
+INTERACTIVE_DEPLOYMENT_PATH = "../../services/interactive/consumer.yaml"
 TIME_TO_SLEEP = 3
 
 

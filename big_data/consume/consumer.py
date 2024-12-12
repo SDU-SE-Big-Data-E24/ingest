@@ -1,4 +1,4 @@
-import avro.schema
+
 import avro.io
 from confluent_kafka import Consumer, KafkaError
 import io

@@ -1,6 +1,7 @@
 requests
 Producer
 fastavro
+BytesIO
 hdfs
 fastavro
 pyarrow

@@ -89,6 +89,9 @@ kubectl port-forward service/namenode 9870:9870
 ```bash
 kubectl run interactive --rm -i --tty --image registry.gitlab.sdu.dk/jah/bigdatarepo/interactive:latest
 ```
+```bash
+kubectl delete -f consumer.yaml
+```
 
 ## Cleanup
 
@@ -105,7 +108,7 @@ kubectl delete -f kafka-schema-registry.yaml
 kubectl delete -f kafka-connect.yaml
 kubectl delete -f kafka-ksqldb.yaml
 helm delete kafka
-kubectl delete -f interactive.yaml
+kubectl delete -f consumer.yaml
 
 kubectl delete -f hdfs-cli.yaml
 kubectl delete -f datanodes.yaml
