@@ -7,6 +7,7 @@ from avro.datafile import DataFileWriter
 from avro.io import DatumWriter
 from confluent_kafka import Producer
 
+
 # Kafka and Schema Registry Configuration
 KAFKA_BOOTSTRAP_SERVERS = "kafka:9092"  # Replace with the actual node IP and port
 SCHEMA_REGISTRY_URL = "http://127.0.0.1:8081"
@@ -32,14 +33,9 @@ def fetch_api_data():
         response = requests.get(API_URL)
         response.raise_for_status()
         result = response.json()
-        for k, v in result.items():
-            print(k, v)
-
         records = result.get('records', [])
-        print('records:')
         for record in records:
-            print(' ', record)
-        return records
+            return records
     except Exception as e:
         print(f"Error fetching API data: {e}")
         return []
@@ -48,7 +44,7 @@ def fetch_api_data():
 # Serialize Record Using Avro
 def serialize_record(record):
     try:
-        writer = DataFileWriter(open("consumption_industry.avro", "wb"), DatumWriter(), schema)
+        writer = DataFileWriter(open("consumption_industry.avro","wb"), DatumWriter(), schema)
         writer.append(record)
         writer.close()
         return True
@@ -57,23 +53,23 @@ def serialize_record(record):
         return False
 
 
+
 def send_to_kafka(record, producer):
     print(f"Preparing to send record to Kafka: {record}")
     try:
         key = str(record.get("MunicipalityNo"))
         if serialize_record(record):
-            print(f"Sending record to Kafka: Key={key}")
             producer.produce(
                 topic=KAFKA_TOPIC,
                 key=key.encode("utf-8"),
                 value=open("consumption_industry.avro", "rb").read()
             )
             producer.flush()
-            print(f"Successfully sent record: {record}")
         else:
             print(f"Serialization failed for record: {record}")
     except Exception as e:
         print(f"Error sending record to Kafka: {e}")
+
 
 
 # Produce Messages Repeatedly
