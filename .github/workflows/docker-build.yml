@@ -33,15 +33,21 @@ jobs:
           echo $NEXT_VERSION > .version
           echo "next_version=$NEXT_VERSION" >> $GITHUB_ENV
 
-      - name: Build Docker image
-        run: |
-          docker build -t ghcr.io/${{ github.repository_owner }}/${{ github.repository }}:$version_number -t ghcr.io/${{ github.repository_owner }}/${{ github.repository }}:latest -f big_data/Dockerfile .
+#      - name: Build Docker image7
+#        run: |
+#          docker build -t ghcr.io/${{ github.repository_owner }}/${{ github.repository }}:$version_number -t ghcr.io/${{ github.repository_owner }}/${{ github.repository }}:latest -f big_data/Dockerfile .
 
-      - name: Push Docker image to GitHub Container Registry
-        run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          docker push ghcr.io/${{ github.repository_owner }}/${{ github.repository }}:$version_number
-          docker push ghcr.io/${{ github.repository_owner }}/${{ github.repository }}:latest
+#      - name: Push Docker image to GitHub Container Registry
+#        run: |
+#          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+#          docker push ghcr.io/${{ github.repository_owner }}/${{ github.repository }}:$version_number
+#          docker push ghcr.io/${{ github.repository_owner }}/${{ github.repository }}:latest
+
+      - name: Build and publish a Docker image for ${{ github.repository }}
+        uses: macbre/push-to-ghcr@master
+        with:
+          image_name: ${{ github.repository }}  # it will be lowercased internally
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Commit updated version file
         run: |
@@ -50,3 +56,4 @@ jobs:
           git add .version
           git commit -m "Update version to $next_version"
           git push
+          
