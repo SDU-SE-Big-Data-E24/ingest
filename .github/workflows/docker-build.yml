@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  build:
+  producer:
     runs-on: ubuntu-latest
 
     steps:
@@ -19,5 +19,22 @@ jobs:
       - name: Build and publish a Docker image for ${{ github.repository }}
         uses: macbre/push-to-ghcr@master
         with:
-          image_name: ${{ github.repository }}  # it will be lowercased internally
+          image_name: ${{ github.repository }}-producer  # Add a specific name for the producer
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          build_args: '--file ./producer/Dockerfile'  # Specify the path to the producer Dockerfile
+
+#  consumer:
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#      - name: Checkout repository
+#        uses: actions/checkout@v3
+#
+#      - name: Setup Docker
+#        uses: docker/setup-buildx-action@v2
+#
+#      - name: Build and publish a Docker image for ${{ github.repository }}
+#        uses: macbre/push-to-ghcr@master
+#        with:
+#          image_name: ${{ github.repository }}  # it will be lowercased internally
+#          github_token: ${{ secrets.GITHUB_TOKEN }}

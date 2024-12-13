@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: interactive-pvc
+  name: fetch-data-pvc
 spec:
   accessModes:
     - ReadWriteOnce
@@ -13,27 +13,27 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: interactive
+  name: fetch-data
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: interactive
+      app: fetch-data
   template:
     metadata:
       labels:
-        app: interactive
+        app: fetch-data
     spec:
       containers:
-        - name: interactive
+        - name: producer-data
 #          image: registry.gitlab.sdu.dk/jah/bigdatarepo/interactive:latest
-          image: jonfjakobsen/fetch-data-image:latest
+          image: ghcr.io/sdu-se-big-data-e24/ingest:latest
           imagePullPolicy: Always
           command: ["sleep", "infinity"]
           volumeMounts:
-            - name: interactive-storage
+            - name: producer-data-storage
               mountPath: /root/code
       volumes:
-        - name: interactive-storage
+        - name: producer-data-storage
           persistentVolumeClaim:
-            claimName: interactive-pvc
+            claimName: producer-data-pvc

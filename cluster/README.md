@@ -46,11 +46,20 @@ kubectl apply -f namenode.yaml
 kubectl apply -f datanodes.yaml
 ````
 
-````bash
+```bash
 kubectl get pod -w
 kubectl describe pod namenode-<ID>
 kubectl logs namenode-<ID>
-````
+```
+
+# Fetch data
+```bash
+kubectl apply -f producer-data.yaml
+```
+update the fetch-data.yaml file with the correct URL
+```bash
+kubectl rollout restart deployment producer-data
+```
 # Port-forwarding
 ```bash
 kubectl port-forward svc/namenode 9870:9870
@@ -86,9 +95,7 @@ curl http://127.0.0.1:9092
 kubectl port-forward service/namenode 9870:9870
 ```
 
-```bash
-kubectl run interactive --rm -i --tty --image registry.gitlab.sdu.dk/jah/bigdatarepo/interactive:latest
-```
+
 ```bash
 kubectl delete -f consumer.yaml
 ```
