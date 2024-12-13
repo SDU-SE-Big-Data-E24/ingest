@@ -90,6 +90,10 @@ curl http://127.0.0.1:9092
 kubectl port-forward service/namenode 9870:9870
 ```
 
+```bash
+kubectl port-forward service/redis 6379:6379
+```
+
 ## Cleanup
 
 

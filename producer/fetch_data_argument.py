@@ -1,18 +1,41 @@
-import requests
+import redis
 import os
-import pickle
-import avro.io
-from avro.datafile import DataFileWriter
-from avro.io import DatumWriter
-from confluent_kafka import Producer
+import requests
 from dotenv import load_dotenv
 from dateutil.parser import parse
 from datetime import timedelta, datetime
+import pickle
 
 # Load environment variables from .env
 load_dotenv()
 
-# File to store the last date value
+# Redis connection settings
+REDIS_HOST = os.getenv("REDIS_HOST", "redis")  # Kubernetes Redis service name
+REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
+REDIS_DB = int(os.getenv("REDIS_DB", 0))
+PROCESSED_RECORDS_KEY = "processed_records"
+
+# Connect to Redis
+redis_client = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB, decode_responses=True)
+
+
+# Save an individual record to Redis
+def save_record_to_redis(record_key, record_data):
+    try:
+        redis_client.hset(PROCESSED_RECORDS_KEY, record_key, record_data)
+    except redis.RedisError as e:
+        print(f"Error saving record {record_key} to Redis: {e}")
+
+
+# Check if a record exists in Redis
+def is_record_in_redis(record_key):
+    try:
+        return redis_client.hexists(PROCESSED_RECORDS_KEY, record_key)
+    except redis.RedisError as e:
+        print(f"Error checking record {record_key} in Redis: {e}")
+        return False
+
+
 LAST_DATE_FILE = "last_date.pkl"
 
 
@@ -40,15 +63,19 @@ API_URL = os.getenv("API_URL")
 API_URL_FIRST_DATE = os.getenv("API_URL_FIRST_DATE")
 API_URL_LAST_DATE = os.getenv("API_URL_LAST_DATE")
 
-
 # Initialize Kafka Producer
+from confluent_kafka import Producer
+
+
 def get_producer():
     return Producer({"bootstrap.servers": KAFKA_BOOTSTRAP_SERVERS})
 
 
+# Fetch Data and Save to Redis
 def historical_fetch(producer):
     try:
         latest_date = parse(requests.get(API_URL_LAST_DATE).json().get('records', [])[0].get('HourUTC'))
+        current_date = parse(requests.get(API_URL_FIRST_DATE).json().get('records', [])[0].get('HourUTC'))
 
         if load_last_date() == 0:
             current_date = parse(requests.get(API_URL_FIRST_DATE).json().get('records', [])[0].get('HourUTC'))
@@ -62,7 +89,16 @@ def historical_fetch(producer):
             schema_name = result.get("dataset", "")
 
             for record in records:
-                send_to_kafka(record, producer, schema_name)
+                record_data = str(record)  # Convert record to string for storage
+                hash_key = hash(record_data)
+
+                if is_record_in_redis(hash_key):
+                    print(f"Record {hash_key} already exists in Redis")
+
+                if not is_record_in_redis(hash_key):  # Avoid duplicates
+                    send_to_kafka(record, producer, schema_name)
+                    check = save_record_to_redis(hash_key, record_data)
+                    print(check)
 
             save_last_date(current_date.strftime("%Y-%m-%dT%H:%M"))
             current_date = next_day
@@ -83,48 +119,25 @@ def fetch_api_data(start_date, end_day):
         return []
 
 
-# Serialize Record Using Avro
-def serialize_record(record, schema):
-    try:
-        writer = DataFileWriter(open("temp_schema.avsc", "wb"), DatumWriter(), schema)
-        writer.append(record)
-        writer.close()
-        return True
-    except Exception as e:
-        print(f"Error serializing record: {e}")
-        return False
-
-
 # Send Record to Kafka
 def send_to_kafka(record, producer, schema_name):
-    schema = avro.schema.parse(open(schema_name + ".avsc", "rb").read())
     try:
         key = str(record.get("MunicipalityNo"))
-        if serialize_record(record, schema):
-            producer.produce(
-                topic=KAFKA_TOPIC,
-                key=key.encode("utf-8"),
-                value=open("temp_schema.avsc", "rb").read()
-            )
-            producer.flush()
-        else:
-            print(f"Serialization failed for record: {record}")
+        value = str(record)  # Serialize record to string
+        producer.produce(
+            topic=KAFKA_TOPIC,
+            key=key.encode("utf-8"),
+            value=value.encode("utf-8")
+        )
+        producer.flush()
     except Exception as e:
         print(f"Error sending record to Kafka: {e}")
-
-
-# Produce Messages Repeatedly
-def produce_messages(producer):
-    # if database has data, fetch data from last date to current date
-    today = datetime.now()
-    if load_last_date() == 0 or load_last_date() <= today:
-        historical_fetch(producer)
 
 
 # Main Function
 def main():
     producer = get_producer()
-    produce_messages(producer)
+    historical_fetch(producer)
 
 
 if __name__ == "__main__":
