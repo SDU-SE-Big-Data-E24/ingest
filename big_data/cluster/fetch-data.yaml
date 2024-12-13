@@ -27,7 +27,7 @@ spec:
       containers:
         - name: fetch-data
 #          image: registry.gitlab.sdu.dk/jah/bigdatarepo/interactive:latest
-          image: jonfjakobsen/fetch-data-image:latest
+          image: ghcr.io/sdu-se-big-data-e24/ingest:latest
           imagePullPolicy: Always
           command: ["sleep", "infinity"]
           volumeMounts:
