@@ -19,6 +19,7 @@ jobs:
       - name: Build and publish a Docker image for ${{ github.repository }}
         uses: macbre/push-to-ghcr@master
         with:
+          context: ./producer
           dockerfile: ./producer/Dockerfile
           image_name: ${{ github.repository }}-producer  # Add a specific name for the producer
           github_token: ${{ secrets.GITHUB_TOKEN }}
