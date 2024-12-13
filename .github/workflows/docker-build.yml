@@ -21,7 +21,7 @@ jobs:
         with:
           image_name: ${{ github.repository }}-producer  # Add a specific name for the producer
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          build_args: '--file ./producer/Dockerfile'  # Specify the path to the producer Dockerfile
+          dockerfile: './producer/Dockerfile.deprecated'  # Specify the path to the producer Dockerfile.deprecated
 
 #  consumer:
 #    runs-on: ubuntu-latest
