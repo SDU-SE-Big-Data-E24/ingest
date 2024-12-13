@@ -16,11 +16,6 @@ kubectl apply -f kafka-connect.yaml
 kubectl apply -f kafka-ksqldb.yaml
 ```
 
-```bash 
-kubectl exec --stdin --tty deployment/kafka-ksqldb-cli -- ksql http://kafka-ksqldb-server:8088
-```
-
-
 ```bash
 kubectl apply -f redpanda.yaml
 ```
