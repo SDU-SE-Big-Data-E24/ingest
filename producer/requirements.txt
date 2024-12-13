@@ -1,12 +1,6 @@
 requests
-Producer
-fastavro
-hdfs
-fastavro
-pyarrow
-pandas
 avro
-kafka-python-ng
-confluent-kafka
-pyspark==3.5.2
-python-dotenv
+confluent_kafka
+load-dotenv
+datetime
+python-dateutil

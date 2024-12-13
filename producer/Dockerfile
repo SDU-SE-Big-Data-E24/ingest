@@ -10,9 +10,10 @@ RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
 
 # Copy only necessary application files
-COPY . /app
+
+COPY .env consumption_industry_schema.avsc fetch_data_argument.py /app/
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
 
-CMD ["tail", "-f", "/dev/null"]
+CMD ["python", "fetch_data_argument.py"]
