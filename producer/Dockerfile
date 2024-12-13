@@ -15,5 +15,4 @@ COPY . /app
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
 
-# Run the application
-CMD []
+CMD ["tail", "-f", "/dev/null"]

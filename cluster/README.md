@@ -95,11 +95,6 @@ curl http://127.0.0.1:9092
 kubectl port-forward service/namenode 9870:9870
 ```
 
-
-```bash
-kubectl delete -f consumer.yaml
-```
-
 ## Cleanup
 
 
