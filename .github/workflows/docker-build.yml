@@ -22,7 +22,6 @@ jobs:
           context: ./producer
           image_name: ${{ github.repository }}-producer  # Add a specific name for the producer
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ./producer/Dockerfile
 #  consumer:
 #    runs-on: ubuntu-latest
 #
