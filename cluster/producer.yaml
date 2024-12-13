@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: fetch-data-pvc
+  name: producer-data-pvc
 spec:
   accessModes:
     - ReadWriteOnce
@@ -13,21 +13,20 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: fetch-data
+  name: producer-data
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: fetch-data
+      app: producer-data
   template:
     metadata:
       labels:
-        app: fetch-data
+        app: producer-data
     spec:
       containers:
         - name: producer-data
-#          image: registry.gitlab.sdu.dk/jah/bigdatarepo/interactive:latest
-          image: ghcr.io/sdu-se-big-data-e24/ingest:latest
+          image: ghcr.io/sdu-se-big-data-e24/ingest-producer:latest
           imagePullPolicy: Always
           command: ["sleep", "infinity"]
           volumeMounts:

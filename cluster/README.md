@@ -54,7 +54,7 @@ kubectl logs namenode-<ID>
 
 # Fetch data
 ```bash
-kubectl apply -f producer-data.yaml
+kubectl apply -f producer.yaml
 ```
 update the fetch-data.yaml file with the correct URL
 ```bash
@@ -114,8 +114,8 @@ kubectl delete -f redpanda.yaml
 kubectl delete -f kafka-schema-registry.yaml
 kubectl delete -f kafka-connect.yaml
 kubectl delete -f kafka-ksqldb.yaml
-helm delete kafka
 kubectl delete -f consumer.yaml
+kubectl delete -f producer.yaml
 
 kubectl delete -f hdfs-cli.yaml
 kubectl delete -f datanodes.yaml

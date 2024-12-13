@@ -16,4 +16,4 @@ COPY . /app
 ENV PYTHONUNBUFFERED=1
 
 # Run the application
-CMD ["python", "fetch_data_argument.py"]
+CMD []
