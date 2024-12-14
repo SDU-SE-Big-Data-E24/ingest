@@ -1,0 +1,27 @@
+{
+    "type": "record",
+    "name": "ConsumptionIndustry",
+    "namespace": "big_data",
+    "fields": [
+        {
+            "name": "HourUTC",
+            "type": "string"
+        },
+        {
+            "name": "HourDK",
+            "type": "string"
+        },
+        {
+            "name": "MunicipalityNo",
+            "type": "string"
+        },
+        {
+            "name": "Branche",
+            "type": "string"
+        },
+        {
+            "name": "ConsumptionkWh",
+            "type": "float"
+        }
+    ]
+}

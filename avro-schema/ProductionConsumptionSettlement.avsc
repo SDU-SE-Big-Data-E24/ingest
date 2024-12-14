@@ -1,0 +1,147 @@
+{
+    "namespace": "big_data",
+    "type": "record",
+    "name": "ProductionConsumptionSettlement",
+    "fields": [
+        {
+            "name": "HourUTC",
+            "type": ["null", "string"],
+            "default": null
+        },
+        {
+            "name": "HourDK",
+            "type": ["null", "string"],
+            "default": null
+        },
+        {
+            "name": "PriceArea",
+            "type": ["null", "string"],
+            "default": null
+        },
+        {
+            "name": "CentralPowerMWh",
+            "type": ["null", "float"],
+            "default": null
+        },
+        {
+            "name": "LocalPowerMWh",
+            "type": ["null", "float"],
+            "default": null
+        },
+        {
+            "name": "CommercialPowerMWh",
+            "type": ["null", "float"],
+            "default": null
+        },
+        {
+            "name": "LocalPowerSelfConMWh",
+            "type": ["null", "float"],
+            "default": null
+        },
+        {
+            "name": "OffshoreWindLt100MW_MWh",
+            "type": ["null", "float"],
+            "default": null
+        },
+        {
+            "name": "OffshoreWindGe100MW_MWh",
+            "type": ["null", "float"],
+            "default": null
+        },
+        {
+            "name": "OnshoreWindLt50kW_MWh",
+            "type": ["null", "float"],
+            "default": null
+        },
+        {
+            "name": "OnshoreWindGe50kW_MWh",
+            "type": ["null", "float"],
+            "default": null
+        },
+        {
+            "name": "HydroPowerMWh",
+            "type": ["null", "float"],
+            "default": null
+        },
+        {
+            "name": "SolarPowerLt10kW_MWh",
+            "type": ["null", "float"],
+            "default": null
+        },
+        {
+            "name": "SolarPowerGe10Lt40kW_MWh",
+            "type": ["null", "float"],
+            "default": null
+        },
+        {
+            "name": "SolarPowerGe40kW_MWh",
+            "type": ["null", "float"],
+            "default": null
+        },
+        {
+            "name": "SolarPowerSelfConMWh",
+            "type": ["null", "float"],
+            "default": null
+        },
+        {
+            "name": "UnknownProdMWh",
+            "type": ["null", "float"],
+            "default": null
+        },
+        {
+            "name": "ExchangeNO_MWh",
+            "type": ["null", "float"],
+            "default": null
+        },
+        {
+            "name": "ExchangeSE_MWh",
+            "type": ["null", "float"],
+            "default": null
+        },
+        {
+            "name": "ExchangeGE_MWh",
+            "type": ["null", "float"],
+            "default": null
+        },
+        {
+            "name": "ExchangeNL_MWh",
+            "type": ["null", "float"],
+            "default": null
+        },
+        {
+            "name": "ExchangeGB_MWh",
+            "type": ["null", "float"],
+            "default": null
+        },
+        {
+            "name": "ExchangeGreatBelt_MWh",
+            "type": ["null", "float"],
+            "default": null
+        },
+        {
+            "name": "GrossConsumptionMWh",
+            "type": ["null", "float"],
+            "default": null
+        },
+        {
+            "name": "GridLossTransmissionMWh",
+            "type": ["null", "float"],
+            "default": null
+        },
+        {
+            "name": "GridLossInterconnectorsMWh",
+            "type": ["null", "float"],
+            "default": null
+        },
+        {
+            "name": "GridLossDistributionMWh",
+            "type": ["null", "float"],
+            "default": null
+        },
+        {
+            "name": "PowerToHeatMWh",
+            "type": ["null", "float"],
+            "default": null
+        }
+    ]
+}

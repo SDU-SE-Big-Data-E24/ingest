@@ -1,9 +1,0 @@
-{
-  "type": "record",
-  "name": "MunicipalityCode",
-  "fields": [
-    { "name": "municipality", "type": "string", "doc": "Kommunenavn" },
-    { "name": "municipality_code", "type": "string", "doc": "Kommunekode" },
-    { "name": "region", "type": "string", "doc": "Regionnavn" }
-  ]
-}

@@ -1,8 +1,0 @@
-{
-  "type": "record",
-  "name": "NationalElectricityCoverage",
-  "fields": [
-    { "name": "timestamp", "type": "string", "logicalType": "timestamp-millis", "doc": "Tidspunkt for måling" },
-    { "name": "coverage_percentage", "type": "double", "doc": "Dækningsgrad i procent" }
-  ]
-}
