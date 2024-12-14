@@ -12,16 +12,30 @@ import avro.schema
 import json
 import hashlib
 from confluent_kafka import Producer
+from urllib.parse import urlparse
 
 # Load environment variables from .env
 load_dotenv()
 
 # Database connection --------------------------------------------------------
 
-# Redis connection settings
-REDIS_HOST = os.getenv("REDIS_HOST", "redis")  # Kubernetes Redis service name
-REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
+REDIS_URL = os.getenv("REDIS_URL", f"{os.getenv('REDIS_PORT', 6379)}")
+try:
+    # Parse the Redis URL
+    parsed_redis_url = urlparse(REDIS_URL)
+
+    # Extract host and port
+    if not parsed_redis_url.hostname or not parsed_redis_url.port:
+        raise ValueError(f"Invalid Redis URL format: {REDIS_URL}")
+
+    REDIS_HOST = parsed_redis_url.hostname
+    REDIS_PORT = parsed_redis_url.port
+except Exception as e:
+    raise ValueError(f"Error parsing Redis URL '{REDIS_URL}': {e}")
+
+# Set Redis database
 REDIS_DB = int(os.getenv("REDIS_DB", 0))
+
 PROCESSED_RECORD_KEY = os.getenv("KAFKA_TOPIC") + "_record_key"
 PROCESSED_DATE_KEY = os.getenv("KAFKA_TOPIC") + "_date_key"
 
