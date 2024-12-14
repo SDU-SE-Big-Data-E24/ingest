@@ -25,14 +25,14 @@ spec:
         app: producer-data
     spec:
       containers:
-        - name: producer-data
-          image: ghcr.io/sdu-se-big-data-e24/ingest-producer:latest
+        - name: producers-data
+          image: ghcr.io/sdu-se-big-data-e24/ingest-producers:latest
           imagePullPolicy: Always
           command: ["sleep", "infinity"]
           volumeMounts:
-            - name: producer-data-storage
+            - name: producers-data-storage
               mountPath: /root/code
       volumes:
-        - name: producer-data-storage
+        - name: producers-data-storage
           persistentVolumeClaim:
-            claimName: producer-data-pvc
+            claimName: producers-data-pvc

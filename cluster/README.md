@@ -53,11 +53,11 @@ kubectl logs namenode-<ID>
 
 # Fetch data
 ```bash
-kubectl apply -f producer.yaml
+kubectl apply -f producers.yaml
 ```
 update the fetch-data.yaml file with the correct URL
 ```bash
-kubectl rollout restart deployment producer-data
+kubectl rollout restart deployment producers-data
 ```
 # Port-forwarding
 ```bash
@@ -113,7 +113,7 @@ kubectl delete -f kafka-schema-registry.yaml
 kubectl delete -f kafka-connect.yaml
 kubectl delete -f kafka-ksqldb.yaml
 kubectl delete -f consumer.yaml
-kubectl delete -f producer.yaml
+kubectl delete -f producers.yaml
 
 kubectl delete -f hdfs-cli.yaml
 kubectl delete -f datanodes.yaml

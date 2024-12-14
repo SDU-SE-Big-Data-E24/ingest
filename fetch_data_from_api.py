@@ -17,7 +17,7 @@ KAFKA_TOPIC = "industry-consumption"
 API_URL = 'https://api.energidataservice.dk/dataset/ConsumptionIndustry?limit=5'
 
 # Load Avro Schema
-schema_path = "producer/consumption_industry_schema.avsc"
+schema_path = "producers/consumption_industry_schema.avsc"
 schema = avro.schema.parse(open(schema_path, "rb").read())
 
 
