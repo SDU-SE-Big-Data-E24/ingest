@@ -10,7 +10,7 @@ RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
 
 # Copy only necessary application files
-COPY consumer.py .env consumption_industry_schema.avsc ./
+COPY consumer.py .env ./
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
