@@ -11,7 +11,7 @@ RUN pip install --no-cache-dir --upgrade pip \
 
 # Copy only necessary application files
 
-COPY .env fetch_data_argument.py /app/
+COPY .env fetch_data_argument.py ./
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1

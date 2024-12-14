@@ -42,6 +42,10 @@ kubectl apply -f datanodes.yaml
 ````
 
 ```bash
+kubectl apply -f redis.yaml
+```
+
+```bash
 kubectl get pod -w
 kubectl describe pod namenode-<ID>
 kubectl logs namenode-<ID>
