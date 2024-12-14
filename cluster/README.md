@@ -53,11 +53,15 @@ kubectl logs namenode-<ID>
 
 # Fetch data
 ```bash
-kubectl apply -f producers.yaml
+kubectl apply -f consumption-industry.yaml
+```
+```bash
+kubectl apply -f production-consumption-settlement.yaml
 ```
 update the fetch-data.yaml file with the correct URL
 ```bash
-kubectl rollout restart deployment producers-data
+kubectl rollout restart deployment ConsumptionIndustry-data
+kubectl rollout restart deployment ProductionConsumptionSettlement-data
 ```
 # Port-forwarding
 ```bash

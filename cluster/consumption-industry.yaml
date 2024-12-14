@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: producer-data-pvc
+  name: consumption-industry-data-pvc
 spec:
   accessModes:
     - ReadWriteOnce
@@ -13,26 +13,26 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: producer-data
+  name: consumption-industry-data
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: producer-data
+      app: consumption-industry-data
   template:
     metadata:
       labels:
-        app: producer-data
+        app: consumption-industry-data
     spec:
       containers:
-        - name: producers-data
-          image: ghcr.io/sdu-se-big-data-e24/ingest-producers:latest
+        - name: consumption-industry-data
+          image: ghcr.io/sdu-se-big-data-e24/ingest-consumptionindustry:latest
           imagePullPolicy: Always
           command: ["sleep", "infinity"]
           volumeMounts:
-            - name: producers-data-storage
+            - name: consumption-industry-data-storage
               mountPath: /root/code
       volumes:
-        - name: producers-data-storage
+        - name: consumption-industry-data-storage
           persistentVolumeClaim:
-            claimName: producers-data-pvc
+            claimName: consumption-industry-data-pvc

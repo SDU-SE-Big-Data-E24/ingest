@@ -19,7 +19,7 @@ jobs:
       - name: Build and publish a Docker image for ${{ github.repository }}
         uses: macbre/push-to-ghcr@master
         with:
-          context: ./producers
+          context: ./producers/ConsumptionIndustry/
           dockerfile: ./producers/ConsumptionIndustry/Dockerfile
           image_name: ${{ github.repository }}-ConsumptionIndustry  # Add a specific name for the producers
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -37,7 +37,7 @@ jobs:
       - name: Build and publish a Docker image for ${{ github.repository }}
         uses: macbre/push-to-ghcr@master
         with:
-          context: ./producers
+          context: ./producers/ProductionConsumptionSettlement
           dockerfile: ./producers/ProductionConsumptionSettlement/Dockerfile
           image_name: ${{ github.repository }}-ProductionConsumptionSettlement  # Add a specific name for the producers
           github_token: ${{ secrets.GITHUB_TOKEN }}
