@@ -60,8 +60,8 @@ kubectl apply -f production-consumption-settlement.yaml
 ```
 update the fetch-data.yaml file with the correct URL
 ```bash
-kubectl rollout restart deployment ConsumptionIndustry-data
-kubectl rollout restart deployment ProductionConsumptionSettlement-data
+kubectl rollout restart deployment consumption-industry-data
+kubectl rollout restart deployment production-consumption-settlement-data
 ```
 # Port-forwarding
 ```bash
