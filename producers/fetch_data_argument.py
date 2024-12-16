@@ -21,8 +21,8 @@ load_dotenv()
 
 # Set Redis database
 REDIS_HOST = os.getenv("REDIS_HOST")
-REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
-REDIS_DB = int(os.getenv("REDIS_DB", "INGEST"))
+REDIS_PORT = os.getenv("REDIS_PORT")
+REDIS_DB = os.getenv("REDIS_DB", "INGEST")
 PROCESSED_RECORD_KEY = os.getenv("KAFKA_TOPIC") + "_record_key"
 PROCESSED_DATE_KEY = os.getenv("KAFKA_TOPIC") + "_date_key"
 
