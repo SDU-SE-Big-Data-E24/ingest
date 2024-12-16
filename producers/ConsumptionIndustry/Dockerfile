@@ -9,6 +9,10 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
 
+RUN apt update
+RUN apt install nano vim-nox -y
+RUN rm -rf /var/lib/apt/lists/*
+
 # Copy only necessary application files
 
 COPY .env fetch_data_argument.py ./
