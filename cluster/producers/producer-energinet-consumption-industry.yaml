@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: production-template-data-pvc
+  name: producer-energinet-consumption-industry-pvc
 spec:
   accessModes:
     - ReadWriteOnce
@@ -13,19 +13,19 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: production-template-data
+  name: producer-energinet-consumption-industry
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: production-template-data
+      app: producer-energinet-consumption-industry
   template:
     metadata:
       labels:
-        app: production-template-data
+        app: producer-energinet-consumption-industry
     spec:
       containers:
-        - name: production-template-data
+        - name: producer-energinet-consumption-industry
           image: ghcr.io/sdu-se-big-data-e24/ingest-energi-net-producer:latest
           imagePullPolicy: Always
           env:
@@ -56,9 +56,9 @@ spec:
             - name: SLEEP_DELAY
               value: "60"
           volumeMounts:
-            - name: production-template-data-storage
+            - name: producer-energinet-consumption-industry-storage
               mountPath: /root/code
       volumes:
-        - name: production-template-data-storage
+        - name: producer-energinet-consumption-industry-storage
           persistentVolumeClaim:
-            claimName: production-template-data-pvc
+            claimName: producer-energinet-consumption-industry-pvc

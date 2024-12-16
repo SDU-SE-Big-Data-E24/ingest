@@ -181,9 +181,8 @@ from confluent_kafka.schema_registry import SchemaRegistryClient
 
 # Kafka and Schema Registry Configuration
 KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS_HOST") + ":" + os.getenv("KAFKA_BOOTSTRAP_SERVERS_PORT")
-SCHEMA_REGISTRY_URL = os.getenv("SCHEMA_REGISTRY_HOST") + ":" + os.getenv("SCHEMA_REGISTRY_PORT")
+SCHEMA_REGISTRY_URL = "http://" + os.getenv("SCHEMA_REGISTRY_HOST") + ":" + os.getenv("SCHEMA_REGISTRY_PORT")
 KAFKA_TOPIC = os.getenv("KAFKA_TOPIC")
-
 # local file path
 SCHEMA_PATH = os.getenv("SCHEMA_PATH")
 
@@ -249,8 +248,7 @@ def serialize_record(record, subject):
 
 # Initialize the Schema Registry client
 def get_schema_registry_client():
-    return SchemaRegistryClient({"url": "http://" + SCHEMA_REGISTRY_URL})
-
+    return SchemaRegistryClient({"url": SCHEMA_REGISTRY_URL})
 
 # Fetch Schema by Subject
 def fetch_schema_from_registry(subject):
