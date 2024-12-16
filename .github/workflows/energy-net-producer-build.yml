@@ -1,0 +1,28 @@
+name: Build Docker Image
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'producers/energi-net/**'
+
+jobs:
+  energy-net:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Docker
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build and publish a Docker image for ${{ github.repository }}
+        uses: macbre/push-to-ghcr@master
+        with:
+          context: ./producers/energi-net/
+          dockerfile: ./producers/energi-net/Dockerfile
+          image_name: ${{ github.repository }}-energi-net-producer  # Add a specific name for the producers
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
