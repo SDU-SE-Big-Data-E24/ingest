@@ -29,6 +29,11 @@ spec:
           image: ghcr.io/sdu-se-big-data-e24/ingest-consumptionindustry:latest
           imagePullPolicy: Always
           command: ["sleep", "infinity"]
+          env:
+            - name: PYTHONUNBUFFERED
+              value: "1"
+            - name: REDIS_PORT
+              value: "6379"
           volumeMounts:
             - name: consumption-industry-data-storage
               mountPath: /root/code
