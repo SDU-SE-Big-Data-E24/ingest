@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'producers/energi-net/**'
+      - '../../producers/energinet/**'
 
 jobs:
   energy-net:
@@ -21,8 +21,8 @@ jobs:
       - name: Build and publish a Docker image for ${{ github.repository }}
         uses: macbre/push-to-ghcr@master
         with:
-          context: ./producers/energi-net/
-          dockerfile: ./producers/energi-net/Dockerfile
-          image_name: ${{ github.repository }}-energi-net-producer  # Add a specific name for the producers
+          context: ./producers/energinet/
+          dockerfile: ./producers/energinet/Dockerfile
+          image_name: ${{ github.repository }}-energinet-producer  # Add a specific name for the producers
           github_token: ${{ secrets.GITHUB_TOKEN }}
 

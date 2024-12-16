@@ -26,7 +26,7 @@ spec:
     spec:
       containers:
         - name: producer-energinet-consumption-industry
-          image: ghcr.io/sdu-se-big-data-e24/ingest-energi-net-producer:latest
+          image: ghcr.io/sdu-se-big-data-e24/ingest-energinet-producer:latest
           imagePullPolicy: Always
           env:
             - name: API_URL
