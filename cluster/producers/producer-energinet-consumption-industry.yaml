@@ -42,9 +42,9 @@ spec:
             - name: KAFKA_BOOTSTRAP_SERVERS_PORT
               value: "9092"
             - name: KAFKA_TOPIC
-              value: "ConsumptionIndusty"
+              value: "ConsumptionIndustry"
             - name: SCHEMA_REGISTRY_HOST
-              value: "schema-registry"
+              value: "kafka-schema-registry"
             - name: SCHEMA_REGISTRY_PORT
               value: "8081"
             - name: REDIS_HOST
