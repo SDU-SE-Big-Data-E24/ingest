@@ -82,7 +82,7 @@ def generate_key_from_record(record):
 API_URL = os.getenv("API_URL")
 FROM_DATE = os.getenv("FROM_DATE")
 TO_DATE = os.getenv("TO_DATE", datetime.now().strftime("%Y-%m-%d"))
-SORT = os.getenv("SORT")
+ORDER_BY = os.getenv("ORDER_BY")
 
 
 def validate_date(date):
@@ -109,23 +109,23 @@ def fetch_api_dates():
     try:
         # Fetch `from_date`
         if not validate_date(FROM_DATE):
-            from_date_response = requests.get(API_URL + f"?offset=0&limit=1&sort={SORT}%20ASC")
+            from_date_response = requests.get(API_URL + f"?offset=0&limit=1&sort={ORDER_BY}%20ASC")
             from_date_response.raise_for_status()
-            from_date = parse(from_date_response.json().get('records', [])[0].get(SORT))
+            from_date = parse(from_date_response.json().get('records', [])[0].get(ORDER_BY))
         else:
-            from_date_response = requests.get(API_URL + f"?offset=0&start={FROM_DATE}&limit=1&sort={SORT}%20ASC")
+            from_date_response = requests.get(API_URL + f"?offset=0&start={FROM_DATE}&limit=1&sort={ORDER_BY}%20ASC")
             from_date_response.raise_for_status()
-            from_date = parse(from_date_response.json().get('records', [])[0].get(SORT))
+            from_date = parse(from_date_response.json().get('records', [])[0].get(ORDER_BY))
 
         # Fetch `to_date`
         if not TO_DATE:
-            to_date_response = requests.get(API_URL + f"?offset=0&limit=1&sort={SORT}%20DESC")
+            to_date_response = requests.get(API_URL + f"?offset=0&limit=1&sort={ORDER_BY}%20DESC")
             to_date_response.raise_for_status()
-            to_date = parse(to_date_response.json().get('records', [])[0].get(SORT))
+            to_date = parse(to_date_response.json().get('records', [])[0].get(ORDER_BY))
         else:
-            to_date_response = requests.get(API_URL + f"?offset=0&end={TO_DATE}&limit=1&sort={SORT}%20DESC")
+            to_date_response = requests.get(API_URL + f"?offset=0&end={TO_DATE}&limit=1&sort={ORDER_BY}%20DESC")
             to_date_response.raise_for_status()
-            to_date = parse(to_date_response.json().get('records', [])[0].get(SORT))
+            to_date = parse(to_date_response.json().get('records', [])[0].get(ORDER_BY))
 
         # Ensure from_date is earlier than to_date
         if from_date > to_date:
@@ -180,10 +180,9 @@ def fetch(producer):
 from confluent_kafka.schema_registry import SchemaRegistryClient
 
 # Kafka and Schema Registry Configuration
-KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS")
-SCHEMA_REGISTRY_URL = os.getenv("SCHEMA_REGISTRY_URL")
+KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS_HOST") + ":" + os.getenv("KAFKA_BOOTSTRAP_SERVERS_PORT")
+SCHEMA_REGISTRY_URL = os.getenv("SCHEMA_REGISTRY_HOST") + ":" + os.getenv("SCHEMA_REGISTRY_PORT")
 KAFKA_TOPIC = os.getenv("KAFKA_TOPIC")
-VALUE_SCHEMA_SUBJECT = os.getenv("VALUE_SCHEMA_SUBJECT")
 
 # local file path
 SCHEMA_PATH = os.getenv("SCHEMA_PATH")
@@ -200,8 +199,8 @@ def get_producer():
 def send_to_kafka(record, producer):
     try:
 
-        key = str(record.get(SORT))
-        if serialize_record(record, VALUE_SCHEMA_SUBJECT):
+        key = str(record.get(ORDER_BY))
+        if serialize_record(record, KAFKA_TOPIC + "-value"):
             producer.produce(
                 topic=KAFKA_TOPIC,
                 key=key.encode("utf-8"),
@@ -250,7 +249,7 @@ def serialize_record(record, subject):
 
 # Initialize the Schema Registry client
 def get_schema_registry_client():
-    return SchemaRegistryClient({"url": SCHEMA_REGISTRY_URL})
+    return SchemaRegistryClient({"url": "http://" + SCHEMA_REGISTRY_URL})
 
 
 # Fetch Schema by Subject
@@ -268,25 +267,7 @@ def fetch_schema_from_registry(subject):
 # Main Function --------------------------------------------------------------
 import time
 
-RESTART_DELAY = int(os.getenv("RESTART_DELAY", 60))
-time.sleep(RESTART_DELAY)
-
-
-def retry_operation(operation, max_retries=5, delay=5, backoff=2, *args, **kwargs):
-    retries = 0
-    while retries < max_retries:
-        try:
-            # Attempt the operation
-            return operation(*args, **kwargs)
-        except Exception as e:
-            retries += 1
-            print(f"Attempt {retries} failed: {e}")
-            if retries >= max_retries:
-                print("Max retries reached. Operation failed.")
-                raise  # Re-raise the last exception
-            sleep_time = delay * (backoff ** (retries - 1))
-            print(f"Retrying in {sleep_time} seconds...")
-            time.sleep(sleep_time)
+SLEEP_DELAY = os.getenv("SLEEP_DELAY", 60)
 
 
 def main():
@@ -301,7 +282,7 @@ def main():
             print(f"Fatal error during fetch: {e}. Retrying in 60 seconds...")
 
         # Wait 60 seconds before restarting
-        time.sleep(60)
+        time.sleep(SLEEP_DELAY)
 
 
 if __name__ == "__main__":

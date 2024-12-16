@@ -79,7 +79,7 @@ http://127.0.0.1:8083/connectors \
 kubectl apply -f consumption-industry.yaml
 ```
 ```bash
-kubectl apply -f production-consumption-settlement.yaml
+kubectl apply -f production-template.yaml
 ```
 update the fetch-data.yaml file with the correct URL
 ```bash
