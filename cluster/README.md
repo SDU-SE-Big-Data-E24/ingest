@@ -50,6 +50,29 @@ kubectl get pod -w
 kubectl describe pod namenode-<ID>
 kubectl logs namenode-<ID>
 ```
+    
+```bash
+curl -X POST \
+http://127.0.0.1:8083/connectors \
+-H 'Content-Type: application/json' \
+-d '{
+    "name": "hdfs-sink",
+    "config": {
+        "connector.class": "io.confluent.connect.hdfs.HdfsSinkConnector",
+        "tasks.max": "3",
+        "topics": "INGESTION",
+        "hdfs.url": "hdfs://namenode:9000",
+        "flush.size": "3",
+        "format.class": "io.confluent.connect.hdfs.json.JsonFormat",
+        "key.converter.schemas.enable":"false",
+        "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+        "key.converter.schema.registry.url": "http://kafka-schema-registry:8081", 
+        "value.converter.schemas.enable":"false",
+        "value.converter.schema.registry.url": "http://kafka-schema-registry:8081", 
+        "value.converter": "org.apache.kafka.connect.json.JsonConverter"
+    }
+}'
+```
 
 # Fetch data
 ```bash
@@ -89,7 +112,7 @@ kubectl port-forward svc/kafka-connect 8083
 curl http://127.0.0.1:8083
 ```
 ```bash
-kubectl port-forward svc/kafka 9092
+kubectl port-forward service/kafka 9092
 ```
 ```bash
 curl http://127.0.0.1:9092
@@ -100,6 +123,14 @@ kubectl port-forward service/namenode 9870:9870
 
 ```bash
 kubectl port-forward service/redis 6379:6379
+```
+
+```bash
+kubectl port-forward service/
+```
+
+
+```bash
 ```
 
 ## Cleanup

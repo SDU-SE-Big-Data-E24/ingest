@@ -19,28 +19,19 @@ load_dotenv()
 
 # Database connection --------------------------------------------------------
 
-REDIS_URL = os.getenv("REDIS_URL", f"{os.getenv('REDIS_PORT', 6379)}")
-try:
-    # Parse the Redis URL
-    parsed_redis_url = urlparse(REDIS_URL)
-
-    # Extract host and port
-    if not parsed_redis_url.hostname or not parsed_redis_url.port:
-        raise ValueError(f"Invalid Redis URL format: {REDIS_URL}")
-
-    REDIS_HOST = parsed_redis_url.hostname
-    REDIS_PORT = parsed_redis_url.port
-except Exception as e:
-    raise ValueError(f"Error parsing Redis URL '{REDIS_URL}': {e}")
-
 # Set Redis database
-REDIS_DB = int(os.getenv("REDIS_DB", 0))
-
+REDIS_HOST = os.getenv("REDIS_HOST")
+REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
+REDIS_DB = int(os.getenv("REDIS_DB", "INGEST"))
 PROCESSED_RECORD_KEY = os.getenv("KAFKA_TOPIC") + "_record_key"
 PROCESSED_DATE_KEY = os.getenv("KAFKA_TOPIC") + "_date_key"
 
 # Connect to Redis
-redis_client = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB, decode_responses=True)
+try:
+    redis_client = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB, decode_responses=True)
+except Exception as e:
+    print(f"Error connecting to Redis: {e}")
+    exit(1)
 
 
 # Clear Redis keys
