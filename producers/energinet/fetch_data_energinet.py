@@ -157,6 +157,7 @@ def fetch(producer):
 
             # Fetch data for the current date
             next_date = from_date + relativedelta(days=1)
+            time.sleep(10)  # Ensure we don't exceed API rate limits
             result = fetch_api_data(from_date.strftime("%Y-%m-%dT%H:%M"), next_date.strftime("%Y-%m-%dT%H:%M"))
             save_record(PROCESSED_DATE_KEY, date_key, {"date": from_date.isoformat()})
             records = result.get("records", [])
@@ -194,37 +195,44 @@ os.makedirs(SCHEMA_CACHE_DIR, exist_ok=True)
 # Initialize AvroProducer
 def get_producer():
     """
-    Initializes an AvroProducer dynamically based on topic-specific schemas.
+    Initialize AvroProducer dynamically for a given topic with key and value schemas.
     """
+    key_subject = f"{KAFKA_TOPIC}-key"
     value_subject = f"{KAFKA_TOPIC}-value"
+
+    # Fetch schemas for both key and value
+    key_schema = get_schema_from_registry(key_subject)
     value_schema = get_schema_from_registry(value_subject)
 
-    # Return an AvroProducer using the dynamic schema
+    # Initialize AvroProducer with key and value schemas
     avro_producer = AvroProducer(
         {
             "bootstrap.servers": KAFKA_BOOTSTRAP_SERVERS,
-            "schema.registry.url": SCHEMA_REGISTRY_URL,
+            "schema.registry.url": SCHEMA_REGISTRY_URL
         },
+        default_key_schema=key_schema,
         default_value_schema=value_schema
     )
     return avro_producer
 
 # Send Record to Kafka
 def send_to_kafka(record, producer):
+    """
+    Send a record to Kafka using AvroProducer dynamically with key and value schemas.
+    """
     try:
-        # Use any field as the key (e.g., first field of the schema)
-        key = str(next(iter(record.values())))  # Use the first value as the key dynamically
-
-        # Ensure the record matches the schema structure
-        value = {field: record[field] for field in record}
+        # Generate a valid Avro key (assume first field for simplicity)
+        key_field = next(iter(record.keys()))  # Dynamically use the first key as schema key
+        key = str(record[key_field])  # Ensure the key matches the key schema (string here)
 
         # Send the record
         producer.produce(
             topic=KAFKA_TOPIC,
-            key=key,
-            value=value
+            key=key,   # Key serialized using key schema
+            value=record  # Value serialized using value schema
         )
         producer.flush()
+        print(f"Record sent to Kafka topic '{KAFKA_TOPIC}': Key={key}, Value={record}")
     except Exception as e:
         print(f"Error sending record to Kafka: {e}")
 
