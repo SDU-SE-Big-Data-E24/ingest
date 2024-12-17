@@ -7,9 +7,9 @@ from fastavro import reader
 
 # Kafka and Schema Registry Configuration
 KAFKA_BOOTSTRAP_SERVERS = "kafka:9092"  # Replace with the actual node IP and port
-KAFKA_TOPIC = "industry-consumption"
-KAFKA_GROUP_ID = "industry-consumption-group"
-SCHEMA_PATH = "consumption_industry_schema.avsc"
+KAFKA_TOPIC = "ConsumptionIndustry"
+KAFKA_GROUP_ID = "ConsumptionIndustry-group"
+SCHEMA_PATH = "ConsumptionIndustry.avsc"
 
 # Load Avro Schema
 schema = avro.schema.parse(open(SCHEMA_PATH, "rb").read())

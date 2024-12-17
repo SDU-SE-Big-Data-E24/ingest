@@ -1,7 +1,0 @@
-requests
-avro
-confluent_kafka
-load-dotenv
-datetime
-python-dateutil
-redis

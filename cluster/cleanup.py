@@ -98,10 +98,10 @@ def cleanup():
     delete_yaml_resources("flume.yaml")
 
     # Step 5: Delete Kafka resources
-    delete_yaml_resources("redpanda.yaml")
-    delete_yaml_resources("kafka-schema-registry.yaml")
-    delete_yaml_resources("kafka-connect.yaml")
-    delete_yaml_resources("kafka-ksqldb.yaml")
+    delete_yaml_resources("kafka/redpanda.yaml")
+    delete_yaml_resources("kafka/kafka-schema-registry.yaml")
+    delete_yaml_resources("kafka/kafka-connect.yaml")
+    delete_yaml_resources("kafka/kafka-ksqldb.yaml")
     delete_helm_resource("kafka")
     delete_pvc_resource("data-kafka-controller-0 data-kafka-controller-1 data-kafka-controller-2")
 
