@@ -192,11 +192,11 @@ CACHE_SCHEMA = {}
 os.makedirs(SCHEMA_CACHE_DIR, exist_ok=True)
 
 # Initialize AvroProducer
-def get_producer(topic_name):
+def get_producer():
     """
     Initializes an AvroProducer dynamically based on topic-specific schemas.
     """
-    value_subject = f"{topic_name}-value"
+    value_subject = f"{KAFKA_TOPIC}-value"
     value_schema = get_schema_from_registry(value_subject)
 
     # Return an AvroProducer using the dynamic schema
