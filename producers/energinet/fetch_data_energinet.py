@@ -146,6 +146,8 @@ def fetch(producer):
         from_date, to_date = fetch_api_dates()
 
         while from_date <= to_date:
+            time.sleep(10)
+
             # Check if date has already been processed
             date_key = generate_key_from_record({"date": from_date.isoformat()})
             if is_record_in_redis(PROCESSED_DATE_KEY, date_key):
