@@ -202,7 +202,7 @@ def send_to_kafka(record, producer):
         if serialize_record(record, KAFKA_TOPIC + "-value"):
             producer.produce(
                 topic=KAFKA_TOPIC,
-                key=key.encode("utf-8"),
+                key=key.encode(),
                 value=open("temp.avro", "rb").read()
             )
             producer.flush()

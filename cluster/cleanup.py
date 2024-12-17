@@ -88,14 +88,14 @@ def cleanup():
     delete_interactive_container()
 
     # Step 2: Delete Sqoop
-    delete_yaml_resources("sqoop.yaml")
+    delete_yaml_resources("storage/sqoop.yaml")
 
     # Step 3: Delete Postgres resources
     delete_helm_resource("postgresql")
     delete_pvc_resource("data-postgresql-0")
 
     # Step 4: Delete Flume
-    delete_yaml_resources("flume.yaml")
+    delete_yaml_resources("storage/flume.yaml")
 
     # Step 5: Delete Kafka resources
     delete_yaml_resources("kafka/redpanda.yaml")
