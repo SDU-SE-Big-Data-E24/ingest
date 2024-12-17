@@ -5,3 +5,5 @@ load-dotenv
 datetime
 python-dateutil
 redis
+AvroSerializer
+fastavro

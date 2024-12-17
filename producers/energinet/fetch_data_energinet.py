@@ -11,9 +11,8 @@ from avro.io import DatumWriter
 import avro.schema
 import json
 import hashlib
-from confluent_kafka import Producer
 from confluent_kafka.avro import AvroProducer
-from confluent_kafka import avro
+from urllib.parse import urlparse
 
 # Load environment variables from .env
 load_dotenv()
@@ -108,26 +107,26 @@ def fetch_api_data(start_date, end_day):
 
 def fetch_api_dates():
     try:
-        from_date_status = None
         # Fetch `from_date`
         if not validate_date(FROM_DATE):
             from_date_response = requests.get(API_URL + f"?offset=0&limit=1&sort={ORDER_BY}%20ASC")
-            print(from_date_response.raise_for_status())
+            from_date_response.raise_for_status()
             from_date = parse(from_date_response.json().get('records', [])[0].get(ORDER_BY))
         else:
             from_date_response = requests.get(API_URL + f"?offset=0&start={FROM_DATE}&limit=1&sort={ORDER_BY}%20ASC")
-            print(from_date_response.raise_for_status())
+            from_date_response.raise_for_status()
             from_date = parse(from_date_response.json().get('records', [])[0].get(ORDER_BY))
 
         # Fetch `to_date`
         if not TO_DATE:
             to_date_response = requests.get(API_URL + f"?offset=0&limit=1&sort={ORDER_BY}%20DESC")
-            print(to_date_response.raise_for_status())
+            to_date_response.raise_for_status()
             to_date = parse(to_date_response.json().get('records', [])[0].get(ORDER_BY))
         else:
             to_date_response = requests.get(API_URL + f"?offset=0&end={TO_DATE}&limit=1&sort={ORDER_BY}%20DESC")
-            print(to_date_response.raise_for_status())
+            to_date_response.raise_for_status()
             to_date = parse(to_date_response.json().get('records', [])[0].get(ORDER_BY))
+
         # Ensure from_date is earlier than to_date
         if from_date > to_date:
             raise ValueError(f"Inverted date range: from_date ({from_date}) is later than to_date ({to_date})")
@@ -145,22 +144,20 @@ def fetch(producer):
     try:
         # set the from and to date
         from_date, to_date = fetch_api_dates()
-        print(f"Fetching data from {from_date} to {to_date}")
 
         while from_date <= to_date:
             # Check if date has already been processed
             date_key = generate_key_from_record({"date": from_date.isoformat()})
             if is_record_in_redis(PROCESSED_DATE_KEY, date_key):
-                print(f"Date {from_date} already processed.")
                 from_date += relativedelta(days=1)
                 continue
 
             # Fetch data for the current date
             next_date = from_date + relativedelta(days=1)
-            time.sleep(10)  # Ensure we don't exceed API rate limits
             result = fetch_api_data(from_date.strftime("%Y-%m-%dT%H:%M"), next_date.strftime("%Y-%m-%dT%H:%M"))
             save_record(PROCESSED_DATE_KEY, date_key, {"date": from_date.isoformat()})
             records = result.get("records", [])
+            # schema_name = result.get("dataset", SCHEMA_PATH)
 
             # Process each record
             for record in records:
@@ -178,63 +175,74 @@ def fetch(producer):
 
 
 # Kafka communication ---------------------------------------------------------
-import os
-import avro.schema
-from confluent_kafka.avro import AvroProducer
+
+from confluent_kafka import Producer
+from confluent_kafka.serialization import StringSerializer, SerializationContext, MessageField
+from confluent_kafka.schema_registry import SchemaRegistryClient
+from confluent_kafka.schema_registry.avro import AvroSerializer
+
 from confluent_kafka.schema_registry import SchemaRegistryClient
 
 # Kafka and Schema Registry Configuration
 KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS_HOST") + ":" + os.getenv("KAFKA_BOOTSTRAP_SERVERS_PORT")
 SCHEMA_REGISTRY_URL = "http://" + os.getenv("SCHEMA_REGISTRY_HOST") + ":" + os.getenv("SCHEMA_REGISTRY_PORT")
 KAFKA_TOPIC = os.getenv("KAFKA_TOPIC")
-SCHEMA_CACHE_DIR = os.getenv("SCHEMA_CACHE_DIR", "./cached_schemas")
+
 CACHE_SCHEMA = {}
-# Ensure schema cache directory exists
-os.makedirs(SCHEMA_CACHE_DIR, exist_ok=True)
 
-# Initialize AvroProducer
+
+def user_to_dict(record, ctx):
+    return record  # Adjust this if your `record` structure differs
+
+
+# Initialize Kafka Producer
 def get_producer():
-    """
-    Initialize AvroProducer dynamically for a given topic with key and value schemas.
-    """
-    key_subject = f"{KAFKA_TOPIC}-key"
-    value_subject = f"{KAFKA_TOPIC}-value"
+    producer = Producer({"bootstrap.servers": KAFKA_BOOTSTRAP_SERVERS})
+    return producer
 
-    # Fetch schemas for both key and value
-    key_schema = get_schema_from_registry(key_subject)
-    value_schema = get_schema_from_registry(value_subject)
-
-    # Initialize AvroProducer with key and value schemas
-    avro_producer = AvroProducer(
-        {
-            "bootstrap.servers": KAFKA_BOOTSTRAP_SERVERS,
-            "schema.registry.url": SCHEMA_REGISTRY_URL
-        },
-        default_key_schema=key_schema,
-        default_value_schema=value_schema
-    )
-    return avro_producer
 
 # Send Record to Kafka
 def send_to_kafka(record, producer):
-    """
-    Send a record to Kafka using AvroProducer dynamically with key and value schemas.
-    """
     try:
-        # Generate a valid Avro key (assume first field for simplicity)
-        key_field = next(iter(record.keys()))  # Dynamically use the first key as schema key
-        key = str(record[key_field])  # Ensure the key matches the key schema (string here)
 
-        # Send the record
+        schema_registry_client = SchemaRegistryClient({"url": SCHEMA_REGISTRY_URL})
+
+        # Load schema string from a schema registry
+        subject = KAFKA_TOPIC + "-value"
+        # Check and cache schema as a string
+        if subject not in CACHE_SCHEMA:
+            try:
+                # Fetch schema from the registry as a string
+                schema_str = fetch_schema_from_registry(subject)
+                CACHE_SCHEMA[subject] = schema_str  # Store raw string
+                print(f"Schema cached for subject: {subject}")
+            except Exception as e:
+                print(f"Error fetching schema for subject {subject}: {e}")
+                raise
+        else:
+            print("Using cached schema for subject:", subject)
+
+        schema_str = CACHE_SCHEMA[subject]
+
+        avro_serializer = AvroSerializer(
+            schema_registry_client=schema_registry_client,
+            schema_str=schema_str,
+            to_dict=user_to_dict
+        )
+
+        key = str(record.get(ORDER_BY))
+        string_serializer = StringSerializer("utf_8")
+        # SerializationContext specifies the message field as the value
         producer.produce(
             topic=KAFKA_TOPIC,
-            key=key,   # Key serialized using key schema
-            value=record  # Value serialized using value schema
+            key=string_serializer(key, SerializationContext(KAFKA_TOPIC, MessageField.KEY)),
+            value=avro_serializer(record, SerializationContext(KAFKA_TOPIC, MessageField.VALUE))
         )
         producer.flush()
-        print(f"Record sent to Kafka topic '{KAFKA_TOPIC}': Key={key}, Value={record}")
+        print(f"Sent record with key: {key}")
     except Exception as e:
         print(f"Error sending record to Kafka: {e}")
+        raise e
 
 
 # def get_cached_schema(subject):
@@ -244,9 +252,9 @@ def send_to_kafka(record, producer):
 #     if subject not in CACHE_SCHEMA:
 #         try:
 #             # Fetch schema from the registry
-#             schema = get_schema_from_registry(subject)
+#             schema_str = fetch_schema_from_registry(subject)
 #             # Parse and store in the cache
-#             CACHE_SCHEMA[subject] = avro.schema.parse(schema)
+#             CACHE_SCHEMA[subject] = avro.schema.parse(schema_str)
 #             print(f"Schema cached for subject: {subject}")
 #         except Exception as e:
 #             print(f"Error fetching or parsing schema for subject {subject}: {e}")
@@ -257,9 +265,12 @@ def send_to_kafka(record, producer):
 # # Serialize Record to Avro
 # def serialize_record(record, subject):
 #     try:
-#
+
 #         schema = get_cached_schema(subject)
-#         # Save schema to a local file
+
+#         # with open(schema_name + ".avsc", "rb") as schema_file:
+#         # schema = avro.schema.parse(schema_file.read())
+
 #         writer = DataFileWriter(open("temp.avro", "wb"), DatumWriter(), schema)
 #         writer.append(record)
 #         writer.close()
@@ -270,33 +281,19 @@ def send_to_kafka(record, producer):
 
 
 # # Initialize the Schema Registry client
-# def get_schema_registry_client():
-#     return SchemaRegistryClient({"url": SCHEMA_REGISTRY_URL})
+def get_schema_registry_client():
+    return SchemaRegistryClient({"url": SCHEMA_REGISTRY_URL})
 
-# Fetch Schema by Subject
-def get_schema_from_registry(subject_name):
-    """
-    Fetches schema from Schema Registry and caches it locally.
-    """
-    schema_cache_file = os.path.join(SCHEMA_CACHE_DIR, f"{subject_name}.avsc")
-    if os.path.exists(schema_cache_file):
-        with open(schema_cache_file, "r") as file:
-            print(f"Loading schema from cache: {schema_cache_file}")
-            return avro.schema.parse(file.read())
 
+# # Fetch Schema by Subject
+def fetch_schema_from_registry(subject):
     try:
-        print(f"Fetching schema for subject: {subject_name}")
-        client = SchemaRegistryClient({"url": SCHEMA_REGISTRY_URL})
-        schema_response = client.get_latest_version(subject_name)
-        schema_str = schema_response.schema.schema_str
-
-        # Cache the schema locally
-        with open(schema_cache_file, "w") as file:
-            file.write(schema_str)
-            print(f"Schema cached at: {schema_cache_file}")
-        return avro.schema.parse(schema_str)
+        client = get_schema_registry_client()
+        # Get the latest version of the schema
+        schema = client.get_latest_version(subject)
+        return schema.schema.schema_str  # Return the schema string
     except Exception as e:
-        print(f"Error fetching schema: {e}")
+        print(f"Error fetching schema from registry: {e}")
         raise
 
 
