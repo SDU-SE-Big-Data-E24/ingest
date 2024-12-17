@@ -146,6 +146,7 @@ def fetch(producer):
         from_date, to_date = fetch_api_dates()
 
         while from_date <= to_date:
+            print("Fetching data for date:", from_date.isoformat())
             time.sleep(10)
 
             # Check if date has already been processed
@@ -172,6 +173,7 @@ def fetch(producer):
 
             from_date = next_date
             clear_redis_key(PROCESSED_RECORD_KEY)
+            print("Done fetching data")
     except Exception as e:
         print(f"Error fetching API data: {e}")
 
