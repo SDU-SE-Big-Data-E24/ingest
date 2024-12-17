@@ -152,6 +152,7 @@ def fetch(producer):
             # Check if date has already been processed
             date_key = generate_key_from_record({"date": from_date.isoformat()})
             if is_record_in_redis(PROCESSED_DATE_KEY, date_key):
+                print("  - Her sker noget skidt, som ikke er super godt :( ")
                 from_date += relativedelta(days=1)
                 continue
 
