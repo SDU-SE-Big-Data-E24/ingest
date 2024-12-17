@@ -197,16 +197,28 @@ def get_producer():
 # Send Record to Kafka
 def send_to_kafka(record, producer):
     try:
+        # Extract key and convert to binary
+        key = str(record.get(ORDER_BY)).encode()  # Binary format (UTF-8)
 
-        key = str(record.get(ORDER_BY))
+        # Serialize the record
         if serialize_record(record, KAFKA_TOPIC + "-value"):
+            value = open("temp.avro", "rb").read()  # Binary data for value
+
+            # Headers can be a list of tuples
+            headers = [
+                ("source", "my-application".encode()),
+                ("type", "binary".encode())
+            ]
+
+            # Produce message with key, value, headers, and compression
             producer.produce(
                 topic=KAFKA_TOPIC,
-                key=key.encode(),
-                value=open("temp.avro", "rb").read()
+                key=key,
+                value=value,
+                headers=headers,
+                compression_type="gzip"  # Example: gzip compression
             )
             producer.flush()
-        producer.flush()
     except Exception as e:
         print(f"Error sending record to Kafka: {e}")
 
