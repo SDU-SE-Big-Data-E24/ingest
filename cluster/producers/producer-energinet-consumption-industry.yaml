@@ -58,6 +58,13 @@ spec:
           volumeMounts:
             - name: producer-energinet-consumption-industry-storage
               mountPath: /root/code
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1"
       volumes:
         - name: producer-energinet-consumption-industry-storage
           persistentVolumeClaim:
