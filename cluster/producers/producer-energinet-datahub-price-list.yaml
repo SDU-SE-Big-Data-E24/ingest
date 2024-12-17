@@ -1,0 +1,71 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: producer-energinet-datahub-pricelist-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: producer-energinet-datahub-pricelist
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: producer-energinet-datahub-pricelist
+  template:
+    metadata:
+      labels:
+        app: producer-energinet-datahub-pricelist
+    spec:
+      containers:
+        - name: producer-energinet-datahub-pricelist
+          image: ghcr.io/sdu-se-big-data-e24/ingest-energinet-producer:latest
+          imagePullPolicy: Always
+          env:
+            - name: API_URL
+              value: "https://api.energidataservice.dk/dataset/DatahubPricelist"
+            - name: ORDER_BY
+              value: "ValidFrom"
+#            - name: FROM_DATE
+#              value: "2021-01-01T00:00:00Z"
+#            - name: TO_DATE
+#              value: "2021-01-01T01:00:00Z"
+            - name: KAFKA_BOOTSTRAP_SERVERS_HOST
+              value: "kafka"
+            - name: KAFKA_BOOTSTRAP_SERVERS_PORT
+              value: "9092"
+            - name: KAFKA_TOPIC
+              value: "DatahubPricelist"
+            - name: SCHEMA_REGISTRY_HOST
+              value: "kafka-schema-registry"
+            - name: SCHEMA_REGISTRY_PORT
+              value: "8081"
+            - name: REDIS_HOST
+              value: "redis"
+            - name: REDIS_PORT
+              value: "6379"
+            - name: REDIS_DB
+              value: "0"
+            - name: SLEEP_DELAY
+              value: "60"
+          volumeMounts:
+            - name: producer-energinet-datahub-pricelist-storage
+              mountPath: /root/code
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1"
+      volumes:
+        - name: producer-energinet-datahub-pricelist-storage
+          persistentVolumeClaim:
+            claimName: producer-energinet-datahub-pricelist-pvc
