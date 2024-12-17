@@ -12,7 +12,7 @@ import avro.schema
 import json
 import hashlib
 from confluent_kafka import Producer
-from urllib.parse import urlparse
+from confluent_kafka import avro
 
 # Load environment variables from .env
 load_dotenv()
@@ -144,6 +144,7 @@ def fetch(producer):
     try:
         # set the from and to date
         from_date, to_date = fetch_api_dates()
+        print(f"Fetching data from {from_date} to {to_date}")
 
         while from_date <= to_date:
             # Check if date has already been processed
