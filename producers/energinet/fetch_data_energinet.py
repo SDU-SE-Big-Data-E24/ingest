@@ -265,7 +265,7 @@ def fetch_schema_from_registry(subject):
 # Main Function --------------------------------------------------------------
 import time
 
-SLEEP_DELAY = os.getenv("SLEEP_DELAY", 60)
+SLEEP_DELAY = int(os.getenv("SLEEP_DELAY", 60))
 
 
 def main():
