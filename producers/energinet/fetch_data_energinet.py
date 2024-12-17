@@ -12,6 +12,7 @@ import avro.schema
 import json
 import hashlib
 from confluent_kafka import Producer
+from confluent_kafka.avro import AvroProducer
 from confluent_kafka import avro
 
 # Load environment variables from .env
@@ -159,7 +160,6 @@ def fetch(producer):
             result = fetch_api_data(from_date.strftime("%Y-%m-%dT%H:%M"), next_date.strftime("%Y-%m-%dT%H:%M"))
             save_record(PROCESSED_DATE_KEY, date_key, {"date": from_date.isoformat()})
             records = result.get("records", [])
-            # schema_name = result.get("dataset", SCHEMA_PATH)
 
             # Process each record
             for record in records:
@@ -177,102 +177,118 @@ def fetch(producer):
 
 
 # Kafka communication ---------------------------------------------------------
-
-
+import os
+import avro.schema
+from confluent_kafka.avro import AvroProducer
 from confluent_kafka.schema_registry import SchemaRegistryClient
 
 # Kafka and Schema Registry Configuration
 KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS_HOST") + ":" + os.getenv("KAFKA_BOOTSTRAP_SERVERS_PORT")
 SCHEMA_REGISTRY_URL = "http://" + os.getenv("SCHEMA_REGISTRY_HOST") + ":" + os.getenv("SCHEMA_REGISTRY_PORT")
 KAFKA_TOPIC = os.getenv("KAFKA_TOPIC")
-# local file path
-SCHEMA_PATH = os.getenv("SCHEMA_PATH")
-
+SCHEMA_CACHE_DIR = os.getenv("SCHEMA_CACHE_DIR", "./cached_schemas")
 CACHE_SCHEMA = {}
+# Ensure schema cache directory exists
+os.makedirs(SCHEMA_CACHE_DIR, exist_ok=True)
 
+# Initialize AvroProducer
+def get_producer(topic_name):
+    """
+    Initializes an AvroProducer dynamically based on topic-specific schemas.
+    """
+    value_subject = f"{topic_name}-value"
+    value_schema = get_schema_from_registry(value_subject)
 
-# Initialize Kafka Producer
-def get_producer():
-    return Producer({"bootstrap.servers": KAFKA_BOOTSTRAP_SERVERS})
-
+    # Return an AvroProducer using the dynamic schema
+    avro_producer = AvroProducer(
+        {
+            "bootstrap.servers": KAFKA_BOOTSTRAP_SERVERS,
+            "schema.registry.url": SCHEMA_REGISTRY_URL,
+        },
+        default_value_schema=value_schema
+    )
+    return avro_producer
 
 # Send Record to Kafka
 def send_to_kafka(record, producer):
     try:
-        # Extract key and convert to binary
-        key = str(record.get(ORDER_BY)).encode()  # Binary format (UTF-8)
+        # Use any field as the key (e.g., first field of the schema)
+        key = str(next(iter(record.values())))  # Use the first value as the key dynamically
 
-        # Serialize the record
-        if serialize_record(record, KAFKA_TOPIC + "-value"):
-            value = open("temp.avro", "rb").read()  # Binary data for value
+        # Ensure the record matches the schema structure
+        value = {field: record[field] for field in record}
 
-            # Headers can be a list of tuples
-            headers = [
-                ("source", "my-application".encode()),
-                ("type", "binary".encode())
-            ]
-
-            # Produce message with key, value, headers, and compression
-            producer.produce(
-                topic=KAFKA_TOPIC,
-                key=key,
-                value=value,
-                headers=headers,
-                compression_type="gzip"  # Example: gzip compression
-            )
-            producer.flush()
+        # Send the record
+        producer.produce(
+            topic=KAFKA_TOPIC,
+            key=key,
+            value=value
+        )
+        producer.flush()
     except Exception as e:
         print(f"Error sending record to Kafka: {e}")
 
 
-def get_cached_schema(subject):
-    """
-    Fetches and caches the schema for a given subject.
-    """
-    if subject not in CACHE_SCHEMA:
-        try:
-            # Fetch schema from the registry
-            schema_str = fetch_schema_from_registry(subject)
-            # Parse and store in the cache
-            CACHE_SCHEMA[subject] = avro.schema.parse(schema_str)
-            print(f"Schema cached for subject: {subject}")
-        except Exception as e:
-            print(f"Error fetching or parsing schema for subject {subject}: {e}")
-            raise
-    return CACHE_SCHEMA[subject]
+# def get_cached_schema(subject):
+#     """
+#     Fetches and caches the schema for a given subject.
+#     """
+#     if subject not in CACHE_SCHEMA:
+#         try:
+#             # Fetch schema from the registry
+#             schema = get_schema_from_registry(subject)
+#             # Parse and store in the cache
+#             CACHE_SCHEMA[subject] = avro.schema.parse(schema)
+#             print(f"Schema cached for subject: {subject}")
+#         except Exception as e:
+#             print(f"Error fetching or parsing schema for subject {subject}: {e}")
+#             raise
+#     return CACHE_SCHEMA[subject]
 
 
-# Serialize Record to Avro
-def serialize_record(record, subject):
-    try:
-
-        schema = get_cached_schema(subject)
-
-        # with open(schema_name + ".avsc", "rb") as schema_file:
-        # schema = avro.schema.parse(schema_file.read())
-
-        writer = DataFileWriter(open("temp.avro", "wb"), DatumWriter(), schema)
-        writer.append(record)
-        writer.close()
-        return True
-    except Exception as e:
-        print(f"Error serializing record: {e}")
-        return False
+# # Serialize Record to Avro
+# def serialize_record(record, subject):
+#     try:
+#
+#         schema = get_cached_schema(subject)
+#         # Save schema to a local file
+#         writer = DataFileWriter(open("temp.avro", "wb"), DatumWriter(), schema)
+#         writer.append(record)
+#         writer.close()
+#         return True
+#     except Exception as e:
+#         print(f"Error serializing record: {e}")
+#         return False
 
 
-# Initialize the Schema Registry client
-def get_schema_registry_client():
-    return SchemaRegistryClient({"url": SCHEMA_REGISTRY_URL})
+# # Initialize the Schema Registry client
+# def get_schema_registry_client():
+#     return SchemaRegistryClient({"url": SCHEMA_REGISTRY_URL})
 
 # Fetch Schema by Subject
-def fetch_schema_from_registry(subject):
+def get_schema_from_registry(subject_name):
+    """
+    Fetches schema from Schema Registry and caches it locally.
+    """
+    schema_cache_file = os.path.join(SCHEMA_CACHE_DIR, f"{subject_name}.avsc")
+    if os.path.exists(schema_cache_file):
+        with open(schema_cache_file, "r") as file:
+            print(f"Loading schema from cache: {schema_cache_file}")
+            return avro.schema.parse(file.read())
+
     try:
-        client = get_schema_registry_client()
-        # Get the latest version of the schema
-        schema = client.get_latest_version(subject)
-        return schema.schema.schema_str  # Return the schema string
+        print(f"Fetching schema for subject: {subject_name}")
+        client = SchemaRegistryClient({"url": SCHEMA_REGISTRY_URL})
+        schema_response = client.get_latest_version(subject_name)
+        schema_str = schema_response.schema.schema_str
+
+        # Cache the schema locally
+        with open(schema_cache_file, "w") as file:
+            file.write(schema_str)
+            print(f"Schema cached at: {schema_cache_file}")
+        return avro.schema.parse(schema_str)
     except Exception as e:
-        print(f"Error fetching schema from registry: {e}")
+        print(f"Error fetching schema: {e}")
         raise
 
 
