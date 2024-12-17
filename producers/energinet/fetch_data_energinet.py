@@ -107,26 +107,26 @@ def fetch_api_data(start_date, end_day):
 
 def fetch_api_dates():
     try:
+        from_date_status = None
         # Fetch `from_date`
         if not validate_date(FROM_DATE):
             from_date_response = requests.get(API_URL + f"?offset=0&limit=1&sort={ORDER_BY}%20ASC")
-            from_date_response.raise_for_status()
+            print(from_date_response.raise_for_status())
             from_date = parse(from_date_response.json().get('records', [])[0].get(ORDER_BY))
         else:
             from_date_response = requests.get(API_URL + f"?offset=0&start={FROM_DATE}&limit=1&sort={ORDER_BY}%20ASC")
-            from_date_response.raise_for_status()
+            print(from_date_response.raise_for_status())
             from_date = parse(from_date_response.json().get('records', [])[0].get(ORDER_BY))
 
         # Fetch `to_date`
         if not TO_DATE:
             to_date_response = requests.get(API_URL + f"?offset=0&limit=1&sort={ORDER_BY}%20DESC")
-            to_date_response.raise_for_status()
+            print(to_date_response.raise_for_status())
             to_date = parse(to_date_response.json().get('records', [])[0].get(ORDER_BY))
         else:
             to_date_response = requests.get(API_URL + f"?offset=0&end={TO_DATE}&limit=1&sort={ORDER_BY}%20DESC")
-            to_date_response.raise_for_status()
+            print(to_date_response.raise_for_status())
             to_date = parse(to_date_response.json().get('records', [])[0].get(ORDER_BY))
-
         # Ensure from_date is earlier than to_date
         if from_date > to_date:
             raise ValueError(f"Inverted date range: from_date ({from_date}) is later than to_date ({to_date})")
@@ -150,6 +150,7 @@ def fetch(producer):
             # Check if date has already been processed
             date_key = generate_key_from_record({"date": from_date.isoformat()})
             if is_record_in_redis(PROCESSED_DATE_KEY, date_key):
+                print(f"Date {from_date} already processed.")
                 from_date += relativedelta(days=1)
                 continue
 
