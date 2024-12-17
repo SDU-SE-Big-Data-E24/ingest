@@ -6,13 +6,8 @@ from dotenv import load_dotenv
 from dateutil.parser import parse
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
-from avro.datafile import DataFileWriter
-from avro.io import DatumWriter
-import avro.schema
 import json
 import hashlib
-from confluent_kafka.avro import AvroProducer
-from urllib.parse import urlparse
 
 # Load environment variables from .env
 load_dotenv()
@@ -96,12 +91,13 @@ def validate_date(date):
 def fetch_api_data(start_date, end_day):
     try:
         print(f"Fetching new data... from {start_date} to {end_day}. ")
-        response = requests.get(API_URL + "?offset=0&start=" + start_date + "&end=" + end_day + "&sort=HourUTC%20DESC")
+        response = requests.get(
+            API_URL + "?offset=0&start=" + start_date + "&end=" + end_day + "&sort=" + ORDER_BY + "%20DESC")
         response.raise_for_status()
         result = response.json()
         return result
     except Exception as e:
-        print(f"Error fetching API data: {e}")
+        print(f"Error fetching API data in call: {e}")
         return []
 
 
@@ -144,17 +140,24 @@ def fetch(producer):
     try:
         # set the from and to date
         from_date, to_date = fetch_api_dates()
+        time_taken = 0
 
         while from_date <= to_date:
+
             print("Fetching data for date:", from_date.isoformat())
-            time.sleep(10)
 
             # Check if date has already been processed
             date_key = generate_key_from_record({"date": from_date.isoformat()})
             if is_record_in_redis(PROCESSED_DATE_KEY, date_key):
-                print("  - Her sker noget skidt, som ikke er super godt :( ")
+                print(f"Date {from_date.isoformat()} already processed.")
                 from_date += relativedelta(days=1)
                 continue
+
+            if time_taken < 10:
+                print("Reducing fetch frequency to avoid rate limiting...")
+                time.sleep(5)
+
+            start_timer = datetime.now()
 
             # Fetch data for the current date
             next_date = from_date + relativedelta(days=1)
@@ -174,9 +177,13 @@ def fetch(producer):
 
             from_date = next_date
             clear_redis_key(PROCESSED_RECORD_KEY)
+            end_timer = datetime.now()
+
+            time_taken = (end_timer - start_timer).total_seconds()
+            print(f"Time taken to fetch data for date {from_date.isoformat()}: {time_taken}")
             print("Done fetching data")
     except Exception as e:
-        print(f"Error fetching API data: {e}")
+        print(f"Error fetching API data main loop: {e}")
 
 
 # Kafka communication ---------------------------------------------------------
@@ -210,10 +217,14 @@ def get_producer():
 def send_to_kafka(record, producer):
     try:
 
-        schema_registry_client = SchemaRegistryClient({"url": SCHEMA_REGISTRY_URL})
-
-        # Load schema string from a schema registry
         subject = KAFKA_TOPIC + "-value"
+        schema_registry_client = SchemaRegistryClient({"url": SCHEMA_REGISTRY_URL})
+        subjects = schema_registry_client.get_subjects()
+        if subject not in subjects:
+            print("Schema registered for subject:", KAFKA_TOPIC + "-value not found.")
+            raise Exception("Schema not found in the registry.")
+        # Load schema string from a schema registry
+
         # Check and cache schema as a string
         if subject not in CACHE_SCHEMA:
             try:
@@ -224,8 +235,6 @@ def send_to_kafka(record, producer):
             except Exception as e:
                 print(f"Error fetching schema for subject {subject}: {e}")
                 raise
-        else:
-            print("Using cached schema for subject:", subject)
 
         schema_str = CACHE_SCHEMA[subject]
 
@@ -244,45 +253,9 @@ def send_to_kafka(record, producer):
             value=avro_serializer(record, SerializationContext(KAFKA_TOPIC, MessageField.VALUE))
         )
         producer.flush()
-        print(f"Sent record with key: {key}")
     except Exception as e:
         print(f"Error sending record to Kafka: {e}")
         raise e
-
-
-# def get_cached_schema(subject):
-#     """
-#     Fetches and caches the schema for a given subject.
-#     """
-#     if subject not in CACHE_SCHEMA:
-#         try:
-#             # Fetch schema from the registry
-#             schema_str = fetch_schema_from_registry(subject)
-#             # Parse and store in the cache
-#             CACHE_SCHEMA[subject] = avro.schema.parse(schema_str)
-#             print(f"Schema cached for subject: {subject}")
-#         except Exception as e:
-#             print(f"Error fetching or parsing schema for subject {subject}: {e}")
-#             raise
-#     return CACHE_SCHEMA[subject]
-
-
-# # Serialize Record to Avro
-# def serialize_record(record, subject):
-#     try:
-
-#         schema = get_cached_schema(subject)
-
-#         # with open(schema_name + ".avsc", "rb") as schema_file:
-#         # schema = avro.schema.parse(schema_file.read())
-
-#         writer = DataFileWriter(open("temp.avro", "wb"), DatumWriter(), schema)
-#         writer.append(record)
-#         writer.close()
-#         return True
-#     except Exception as e:
-#         print(f"Error serializing record: {e}")
-#         return False
 
 
 # # Initialize the Schema Registry client
