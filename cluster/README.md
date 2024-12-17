@@ -43,11 +43,15 @@ kubectl port-forward svc/namenode 9000:9000
 kubectl apply -f producers/producer-energinet-consumption-industry.yaml
 ```
 ```bash
-curl -X POST -H "Content-Type: application/vnd.schemaregistry.v1+json" --data "{\"schema\": $(cat avro-schema/ConsumptionIndustry.avsc | jq -Rs .)}" http://localhost:8081/subjects/ConsumptionIndustry-value/versions
+curl -X POST -H "Content-Type: application/vnd.schemaregistry.v1+json" --data "{\"schema\": \"{\\\"type\\\":\\\"record\\\",\\\"name\\\":\\\"ConsumptionIndustry\\\",\\\"namespace\\\":\\\"big_data\\\",\\\"fields\\\":[{\\\"name\\\":\\\"HourUTC\\\",\\\"type\\\":\\\"string\\\"},{\\\"name\\\":\\\"HourDK\\\",\\\"type\\\":\\\"string\\\"},{\\\"name\\\":\\\"MunicipalityNo\\\",\\\"type\\\":\\\"string\\\"},{\\\"name\\\":\\\"Branche\\\",\\\"type\\\":\\\"string\\\"},{\\\"name\\\":\\\"ConsumptionkWh\\\",\\\"type\\\":\\\"float\\\"}]}\"}" http://localhost:8081/subjects/ConsumptionIndustry-value/versions
+```
+```bash
+curl -X GET http://localhost:8081/subjects/ConsumptionIndustry-value/versions/latest
 ```
 
 ```bash
 curl -X POST -H "Content-Type: application/json" -d @configuration.json http://127.0.0.1:8083/connectors
+
 ```
 ```bash
 curl -X POST -H "Content-Type: application/json" -d "{ 
@@ -131,8 +135,7 @@ curl http://127.0.0.1:9092
 
 update the fetch-data.yaml file with the correct URL
 ```bash
-kubectl rollout restart deployment consumption-industry-data
-kubectl rollout restart deployment production-consumption-settlement-data
+kubectl rollout restart producer-energinet-consumption-industry
 ```
 
 
