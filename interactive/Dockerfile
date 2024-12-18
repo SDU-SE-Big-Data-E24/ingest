@@ -38,6 +38,6 @@ ENV HADOOP_OPTS=-Djava.library.path=$HADOOP_HOME/lib
 ENV PYSPARK_PYTHON=python
 ENV PYSPARK_DRIVER_PYTHON=python
 USER root
-WORKDIR /home/root/code
+WORKDIR /app
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt

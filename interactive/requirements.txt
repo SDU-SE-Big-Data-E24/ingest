@@ -1,0 +1,14 @@
+hdfs
+fastavro
+pyarrow
+pandas
+kafka-python-ng
+pyspark==3.5.2
+requests
+avro
+confluent_kafka
+load-dotenv
+datetime
+python-dateutil
+redis
+fastavro

@@ -1,7 +1,7 @@
-**Task**: Deploy Kafka using the `helm` and the following [kafka-values.yaml](kafka-values.yaml) file.
+**Task**: Deploy Kafka using the `helm` and the following [kafka-values.yaml](kafka/kafka-values.yaml) file.
 
 ```bash
-helm install --values kafka-values.yaml kafka oci://registry-1.docker.io/bitnamicharts/kafka --version 30.0.4
+helm install --values kafka/kafka-values.yaml kafka oci://registry-1.docker.io/bitnamicharts/kafka --version 30.0.4
 ```
 # Kafka
 ```bash
@@ -76,8 +76,6 @@ curl -X POST -H "Content-Type: application/json" -d "{
 
 ```bash
 kafka-consumer-groups.sh --bootstrap-server localhost:9092  --describe --group _confluent-ksql-kafka-ksqldb-group-id-01transient_transient_STREAM_CONSUMPTION_INDUSTRY_6448920560480449782_1734424504838
-
-
 ```
 
 ```bash
@@ -141,9 +139,21 @@ kubectl rollout restart producer-energinet-consumption-industry
 
 ## Cleanup
 ```bash
+python cleanup.py
+````
+
+```bash
 kubectl get pod -w
-kubectl delete all --all
-kubectl delete pvc --all
-helm delete kafka
 ```
 
+```bash
+kubectl delete all --all
+
+```
+```bash
+kubectl delete pvc --all
+```
+```bash
+
+helm delete kafka
+```

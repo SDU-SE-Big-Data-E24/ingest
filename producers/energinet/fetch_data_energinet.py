@@ -190,7 +190,6 @@ def fetch(producer):
 
 from confluent_kafka import Producer
 from confluent_kafka.serialization import StringSerializer, SerializationContext, MessageField
-from confluent_kafka.schema_registry import SchemaRegistryClient
 from confluent_kafka.schema_registry.avro import AvroSerializer
 
 from confluent_kafka.schema_registry import SchemaRegistryClient
