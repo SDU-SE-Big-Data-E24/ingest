@@ -6,4 +6,6 @@ datetime
 python-dateutil
 redis
 fastavro
+jsonschema
 httpx
+cachetools
