@@ -10,7 +10,7 @@ RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
 
 # Copy only necessary application files
-COPY fetch_data_energinet.py ./
+COPY fetch_data_statbank.py ./
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
