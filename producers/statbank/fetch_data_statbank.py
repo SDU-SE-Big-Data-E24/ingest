@@ -130,6 +130,7 @@ SLEEP_DELAY = int(os.getenv("SLEEP_DELAY", 60))
 def main():
     while True:
         try:
+            print ("Fetching data from Statbank API")
             raw_data = fetch_statbank_data()
             if not raw_data:
                 return
