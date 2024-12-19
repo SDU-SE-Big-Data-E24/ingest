@@ -26,7 +26,7 @@ spec:
     spec:
       containers:
         - name: producer-statbank-bil54-electricity
-          image: ghcr.io/sdu-se-big-data-e24/ingest-energinet-producer:latest
+          image: ghcr.io/sdu-se-big-data-e24/ingest-statbank-producer:latest
           imagePullPolicy: Always
           env:
             - name: PARAM
@@ -47,6 +47,8 @@ spec:
               value: "6379"
             - name: REDIS_DB
               value: "0"
+            - name: SLEEP_DELAY
+              value: "60"
           volumeMounts:
             - name: producer-statbank-bil54-electricity-storage
               mountPath: /root/code

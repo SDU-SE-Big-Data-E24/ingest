@@ -47,6 +47,8 @@ spec:
               value: "6379"
             - name: REDIS_DB
               value: "0"
+            - name: SLEEP_DELAY
+              value: "60"
           volumeMounts:
             - name: producer-statbank-bil52-electricity-storage
               mountPath: /root/code

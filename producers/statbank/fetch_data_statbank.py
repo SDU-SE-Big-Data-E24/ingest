@@ -10,6 +10,7 @@ import redis
 from dotenv import load_dotenv
 import hashlib
 
+load_dotenv()
 # Configuration
 
 REDIS_HOST = "redis"
@@ -122,22 +123,31 @@ def process_data_by_month(cleaned_data, producer, schema_registry_client):
             redis_client.hset(KAFKA_TOPIC, record_key, json.dumps(record))
 
 
+import time
+
+SLEEP_DELAY = int(os.getenv("SLEEP_DELAY", 60))
+
 def main():
-    try:
-        raw_data = fetch_statbank_data()
-        if not raw_data:
-            return
+    while True:
+        try:
+            raw_data = fetch_statbank_data()
+            if not raw_data:
+                return
 
-        cleaned_data = clean_statbank_data(raw_data)
+            cleaned_data = clean_statbank_data(raw_data)
 
-        schema_registry_client = SchemaRegistryClient({"url": SCHEMA_REGISTRY_URL})
-        producer = Producer({"bootstrap.servers": KAFKA_BOOTSTRAP_SERVERS})
+            schema_registry_client = SchemaRegistryClient({"url": SCHEMA_REGISTRY_URL})
+            producer = Producer({"bootstrap.servers": KAFKA_BOOTSTRAP_SERVERS})
 
-        process_data_by_month(cleaned_data, producer, schema_registry_client)
+            process_data_by_month(cleaned_data, producer, schema_registry_client)
 
-        print("Data processing completed.")
-    except Exception as e:
-        print(f"Error in main: {e}")
+            print("Data processing completed.")
+        except Exception as e:
+            print(f"Error in main: {e}")
+
+        # Wait 60 seconds before restarting
+        time.sleep(SLEEP_DELAY)
+
 
 
 if __name__ == "__main__":
