@@ -1,0 +1,81 @@
+{
+  "type": "record",
+  "name": "MotorVehicleStock",
+  "namespace": "api.statbank.dk",
+  "fields": [
+    {
+      "name": "region",
+      "type": "string",
+      "doc": "Region (e.g., All Denmark)"
+    },
+    {
+      "name": "type_of_vehicle",
+      "type": "string",
+      "doc": "Type of vehicle (e.g., Vehicles total)"
+    },
+    {
+      "name": "terms_of_use",
+      "type": "string",
+      "doc": "Terms of use (e.g., Total)"
+    },
+    {
+      "name": "propellant",
+      "type": "string",
+      "doc": "Propellant type (e.g., Total propellant)"
+    },
+    {
+      "name": "content_label",
+      "type": ["null", "string"],
+      "default": null,
+      "doc": "Content description (e.g., Stock of motor vehicles)"
+    },
+    {
+      "name": "unit",
+      "type": "string",
+      "doc": "Unit of measurement (e.g., Number)"
+    },
+    {
+      "name": "time",
+      "type": "string",
+      "doc": "Time period (e.g., 2018M01)"
+    },
+    {
+      "name": "value",
+      "type": "int",
+      "doc": "Stock value"
+    },
+    {
+      "name": "label",
+      "type": "string",
+      "doc": "Dataset label (e.g., Stock of motor vehicles by region, type of vehicle, terms of use, propellant, Indhold and time)"
+    },
+    {
+      "name": "source",
+      "type": "string",
+      "doc": "Source of the dataset (e.g., Statistics Denmark)"
+    },
+    {
+      "name": "updated",
+      "type": "string",
+      "logicalType": "timestamp-millis",
+      "doc": "Timestamp of the last update"
+    },
+    {
+      "name": "documentation",
+      "type": ["null", "string"],
+      "default": null,
+      "doc": "Link to the dataset documentation"
+    },
+    {
+      "name": "table_id",
+      "type": "string",
+      "default": null,
+      "doc": "Table ID of the dataset (e.g., BIL54)"
+    },
+    {
+      "name": "decimals",
+      "type": "int",
+      "doc": "Number of decimals used in the data"
+    }
+  ]
+}

@@ -23,7 +23,17 @@ RUN apt-get update && apt install software-properties-common -yq tzdata \
     && curl -O https://archive.apache.org/dist/hadoop/common/hadoop-3.2.1/hadoop-3.2.1.tar.gz \
     && tar xzf hadoop-3.2.1.tar.gz \
     && rm hadoop-3.2.1.tar.gz \
-    && mv hadoop-3.2.1 /usr/local/hadoop
+    && mv hadoop-3.2.1 /usr/local/hadoop \
+    \
+    # Install kubectl
+    && curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" \
+    && install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl \
+    \
+    # Optional: Install Helm
+    && curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash \
+    \
+    # Clean up
+    && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ENV HADOOP_HOME=/usr/local/hadoop
 ENV PATH=$PATH:$HADOOP_HOME/bin
@@ -37,7 +47,12 @@ ENV HADOOP_OPTS=-Djava.library.path=$HADOOP_HOME/lib
 
 ENV PYSPARK_PYTHON=python
 ENV PYSPARK_DRIVER_PYTHON=python
+
 USER root
-WORKDIR /app
+WORKDIR /home/root/code
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
+CMD ["tail", "-f", "/dev/null"]
+
+
+

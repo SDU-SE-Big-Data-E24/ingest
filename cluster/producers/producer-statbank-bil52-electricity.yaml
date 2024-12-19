@@ -1,0 +1,63 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: producer-statbank-bil52-electricity-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: producer-statbank-bil52-electricity
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: producer-statbank-bil52-electricity
+  template:
+    metadata:
+      labels:
+        app: producer-statbank-bil52-electricity
+    spec:
+      containers:
+        - name: producer-statbank-bil52-electricity
+          image: ghcr.io/sdu-se-big-data-e24/ingest-energinet-producer:latest
+          imagePullPolicy: Always
+          env:
+            - name: PARAM
+              value: "lang=en&EJER=*&DRIV=*&Tid=*"
+            - name: KAFKA_BOOTSTRAP_SERVERS_HOST
+              value: "kafka"
+            - name: KAFKA_BOOTSTRAP_SERVERS_PORT
+              value: "9092"
+            - name: KAFKA_TOPIC
+              value: "Bil52"
+            - name: SCHEMA_REGISTRY_HOST
+              value: "kafka-schema-registry"
+            - name: SCHEMA_REGISTRY_PORT
+              value: "8081"
+            - name: REDIS_HOST
+              value: "redis"
+            - name: REDIS_PORT
+              value: "6379"
+            - name: REDIS_DB
+              value: "0"
+          volumeMounts:
+            - name: producer-statbank-bil52-electricity-storage
+              mountPath: /root/code
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1"
+      volumes:
+        - name: producer-statbank-bil52-electricity-storage
+          persistentVolumeClaim:
+            claimName: producer-statbank-bil52-electricity-pvc

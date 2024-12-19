@@ -26,9 +26,8 @@ spec:
     spec:
       containers:
         - name: interactive
-          image: jonfjakobsen/interactive:latest
+          image: jonfjakobsen/interactive-container:latest
           imagePullPolicy: Always
-          command: ["sleep", "infinity"]
           volumeMounts:
             - name: interactive-storage
               mountPath: /root/code

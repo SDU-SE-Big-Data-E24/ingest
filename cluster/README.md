@@ -1,7 +1,7 @@
-**Task**: Deploy Kafka using the `helm` and the following [kafka-values.yaml](kafka/kafka-values.yaml) file.
+**Task**: Deploy Kafka using the `helm` and the following [kafka-values.yaml](kafka-values.yaml) file.
 
 ```bash
-helm install --values kafka/kafka-values.yaml kafka oci://registry-1.docker.io/bitnamicharts/kafka --version 30.0.4
+helm install --values kafka-values.yaml kafka oci://registry-1.docker.io/bitnamicharts/kafka --version 30.0.4
 ```
 # Kafka
 ```bash
@@ -51,8 +51,7 @@ curl -X GET http://localhost:8081/subjects/ConsumptionIndustry-value/versions/la
 ```
 
 ```bash
-curl -X POST -H "Content-Type: application/json" -d @configuration.json http://127.0.0.1:8083/connectors
-
+curl -X POST -H "Content-Type: application/json" -d @cluster/configuration.json http://127.0.0.1:8083/connectors
 ```
 ```bash
 curl -X POST -H "Content-Type: application/json" -d "{ 
@@ -113,8 +112,11 @@ CREATE STREAM STREAM_INGESTION (
     ConsumptionkWh DOUBLE
 ) WITH (
     KAFKA_TOPIC = 'ConsumptionIndustry',
-    VALUE_FORMAT = 'AVRO'
+    VALUE_FORMAT = 'AVRO',
+    PARTITIONS = 2, -- Antal partitioner
+    REPLICAS = 1    -- Antal replikationer
 );
+
 ```
 
 
@@ -135,6 +137,10 @@ curl http://127.0.0.1:9092
 update the fetch-data.yaml file with the correct URL
 ```bash
 kubectl rollout restart producer-energinet-consumption-industry
+```
+
+```bash
+kubectl rollout restart interactive
 ```
 
 ## Cleanup

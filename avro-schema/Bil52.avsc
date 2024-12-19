@@ -1,0 +1,37 @@
+{
+  "type": "record",
+  "name": "PassengerCarStock",
+  "namespace": "api.statbank.dk",
+  "fields": [
+    {
+      "name": "time",
+      "type": "string",
+      "doc": "Time period (e.g., 2024M11)"
+    },
+    {
+      "name": "value",
+      "type": "int",
+      "doc": "Value for the specified time period"
+    },
+    {
+      "name": "ownership",
+      "type": "string",
+      "doc": "Ownership type (e.g., Total)"
+    },
+    {
+      "name": "propellant",
+      "type": "string",
+      "doc": "Propellant type (e.g., Electricity)"
+    },
+    {
+      "name": "unit",
+      "type": "string",
+      "doc": "Unit of measurement"
+    },
+    {
+      "name": "label",
+      "type": "string",
+      "doc": "Dataset label (e.g., Stock of passenger cars by ownership, propellant, Indhold and time)"
+    }
+  ]
+}
