@@ -26,7 +26,7 @@ spec:
     spec:
       containers:
         - name: producer-statbank-bil52-electricity
-          image: ghcr.io/sdu-se-big-data-e24/ingest-energinet-producer:latest
+          image: ghcr.io/sdu-se-big-data-e24/ingest-statbank-producer:latest
           imagePullPolicy: Always
           env:
             - name: PARAM
