@@ -94,9 +94,7 @@ def clean_statbank_data(raw_data):
 def send_to_kafka(record, producer, schema_registry_client):
     try:
         subject = KAFKA_TOPIC + "-value"
-        print(record)
         schema = schema_registry_client.get_latest_version(subject).schema.schema_str
-        print(schema)
         avro_serializer = AvroSerializer(
             schema_registry_client=schema_registry_client,
             schema_str=schema,
